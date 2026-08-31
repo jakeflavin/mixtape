@@ -65,11 +65,13 @@ global reset also floors CSS animation durations), and the disc is rendered park
 
 - Closed case: `min(84vw, 420px)`, aspect 1.06 — the near-square of a real jewel case,
   spine at 6.5%.
-- Open case: a plastic shell — a rim all round, a hinge between the halves — with two
-  equal panels to 960px wide. Under 900px the case stands upright: tray, hinge, booklet.
-  The tray never disappears; the album is the interface at every width. Cover and disc
-  type scale with container queries (`cqw`), so the same components serve the invite,
-  the builder preview, and any size between.
+- Open case: a plastic shell — a rim all round, a hinge between the halves — with an
+  empty lid (recess and tabs) on one side and the tray on the other, to 960px wide.
+  Under 900px the case stands upright: lid, hinge, tray. The booklet is absolutely
+  positioned over the shell, off centre and rotated about -3°, with a drop shadow that
+  sells it as resting on the plastic; on a phone it stops partway down the tray so the
+  disc shows. Cover and disc type scale with container queries (`cqw`), so the same
+  components serve the invite, the builder preview, and any size between.
 - The booklet is a stack of sheets, each a paper insert with staples at the binding
   and a gutter shadow. A turn is only the `is-read` class: the sheet rotates over its
   left edge (perspective on the stack) and fades past vertical, all CSS transitions —

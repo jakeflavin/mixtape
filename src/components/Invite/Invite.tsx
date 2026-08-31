@@ -49,7 +49,12 @@ export function Invite({ doc }: InviteProps) {
   const url = useMemo(() => shareUrl(doc), [doc])
 
   const pages = useMemo<[Page, ...Page[]]>(() => {
-    const list: Page[] = [{ id: 'date', label: 'The date', content: <DatePage doc={doc} /> }]
+    const list: Page[] = [
+      // A booklet starts at its cover — the album art again, printed on paper —
+      // so the first flip is opening the booklet itself.
+      { id: 'cover', label: 'Cover', content: <CoverArt doc={doc} /> },
+      { id: 'date', label: 'The date', content: <DatePage doc={doc} /> },
+    ]
     if (doc.travel.length > 0)
       list.push({ id: 'travel', label: 'Getting there', content: <TravelPage doc={doc} /> })
     if (doc.faqs.length > 0)
@@ -180,7 +185,25 @@ export function Invite({ doc }: InviteProps) {
           aria-label="Save-the-date booklet"
         >
           <div className="case-shell">
-            <div className="panel booklet" aria-roledescription="carousel">
+            {/* The case is only a case: an empty lid the booklet came out of,
+                the hinge, and the tray holding the disc. The booklet is its
+                own object, resting on the open case slightly askew. */}
+            <div className="panel lid" aria-hidden="true">
+              <span className="lid-recess" />
+              <span className="lid-tab is-top" />
+              <span className="lid-tab is-bottom" />
+            </div>
+            <div className="case-hinge" aria-hidden="true">
+              <i />
+              <i />
+            </div>
+            <div className="panel tray" aria-hidden="true">
+              <div className="tray-recess">
+                <Disc names={doc.names} album={doc.album} spinning />
+              </div>
+              <span className="tray-clip" />
+            </div>
+            <div className="booklet" aria-roledescription="carousel">
               <div
                 className="booklet-window"
                 onPointerDown={handlePointerDown}
@@ -190,10 +213,10 @@ export function Invite({ doc }: InviteProps) {
                 onPointerLeave={handlePointerEnd}
                 onClickCapture={handleClickCapture}
               >
-                {/* A stapled booklet, not a strip: every page is a sheet in a
-                    stack, and a turn lifts the top sheet over its binding.
-                    Read sheets sit flipped at the spine; a class change is the
-                    whole turn, so nothing waits on an animation callback. */}
+                {/* A stapled booklet: every page is a sheet in a stack, and a
+                    turn lifts the top sheet over its binding. Read sheets sit
+                    flipped at the spine; a class change is the whole turn, so
+                    nothing waits on an animation callback. */}
                 <div className="booklet-sheets">
                   {pages.map((page, index) => {
                     const held = sheetRotation(index)
@@ -202,7 +225,12 @@ export function Invite({ doc }: InviteProps) {
                     return (
                       <section
                         key={page.id}
-                        className={['sheet', read ? 'is-read' : '', held !== null ? 'is-held' : '']
+                        className={[
+                          'sheet',
+                          page.id === 'cover' ? 'is-cover' : '',
+                          read ? 'is-read' : '',
+                          held !== null ? 'is-held' : '',
+                        ]
                           .filter(Boolean)
                           .join(' ')}
                         aria-label={page.label}
@@ -218,14 +246,14 @@ export function Invite({ doc }: InviteProps) {
                           opacity: held !== null ? 1 : undefined,
                         }}
                       >
-                        <p className="page-eyebrow">Track {String(index + 1).padStart(2, '0')}</p>
+                        {page.id !== 'cover' && (
+                          <p className="page-eyebrow">Track {String(index).padStart(2, '0')}</p>
+                        )}
                         {page.content}
                       </section>
                     )
                   })}
                 </div>
-              </div>
-              {lastIndex > 0 && (
                 <nav className="booklet-nav" aria-label="Booklet pages">
                   <button
                     type="button"
@@ -234,11 +262,10 @@ export function Invite({ doc }: InviteProps) {
                     disabled={pageIndex === 0}
                     onClick={() => turnTo(pageIndex - 1)}
                   >
-                    <ChevronLeft size={18} aria-hidden="true" />
+                    <ChevronLeft size={16} aria-hidden="true" />
                   </button>
                   <span className="booklet-folio">
-                    {String(pageIndex + 1).padStart(2, '0')} /{' '}
-                    {String(pages.length).padStart(2, '0')}
+                    {String(pageIndex).padStart(2, '0')} / {String(lastIndex).padStart(2, '0')}
                   </span>
                   <button
                     type="button"
@@ -247,20 +274,10 @@ export function Invite({ doc }: InviteProps) {
                     disabled={pageIndex === lastIndex}
                     onClick={() => turnTo(pageIndex + 1)}
                   >
-                    <ChevronRight size={18} aria-hidden="true" />
+                    <ChevronRight size={16} aria-hidden="true" />
                   </button>
                 </nav>
-              )}
-            </div>
-            <div className="case-hinge" aria-hidden="true">
-              <i />
-              <i />
-            </div>
-            <div className="panel tray" aria-hidden="true">
-              <div className="tray-recess">
-                <Disc names={doc.names} album={doc.album} spinning />
               </div>
-              <span className="tray-clip" />
             </div>
           </div>
         </OpenCase>

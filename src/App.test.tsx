@@ -56,12 +56,15 @@ describe('invite', () => {
     // Reduced motion matches in jsdom, so the case opens without waiting for
     // the lid swing.
     expect(await screen.findByRole('navigation', { name: /booklet pages/i })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: /saturday|june/i })).toBeInTheDocument()
 
-    expect(screen.getByText('01 / 04')).toBeInTheDocument()
+    // The booklet opens at its cover; the folio counts it as page zero.
+    expect(screen.getByText('00 / 04')).toBeInTheDocument()
 
     // Sheets off the top of the stack are aria-hidden until turned to, and
     // the chevron flips one sheet at a time.
+    await user.click(screen.getByRole('button', { name: /next page/i }))
+    expect(await screen.findByRole('heading', { name: /saturday|june/i })).toBeInTheDocument()
+
     await user.click(screen.getByRole('button', { name: /next page/i }))
     expect(
       await screen.findByRole('heading', { name: 'Getting there', level: 2 }),
@@ -90,7 +93,8 @@ describe('invite', () => {
     render(<App />)
     await user.click(screen.getByRole('button', { name: /open the case/i }))
     await screen.findByRole('navigation', { name: /booklet pages/i })
-    expect(screen.getByText('01 / 02')).toBeInTheDocument()
+    expect(screen.getByText('00 / 02')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: /next page/i }))
     await user.click(screen.getByRole('button', { name: /next page/i }))
     expect(await screen.findByRole('link', { name: /open the playlist/i })).toBeInTheDocument()
   })

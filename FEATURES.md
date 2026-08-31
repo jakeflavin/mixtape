@@ -34,16 +34,20 @@ without decompressing anything.
   The disc waits underneath so the opening swing reveals it. "Press to open" under it.
 - **Opening**: the lid swings 104° on a perspective hinge (0.8s). The end of the swing is
   a timer, not an animation callback — see the comment in `Invite.tsx`.
-- **Open**: the same case, open — a plastic shell with a rim and a hinge, the booklet
-  paper on one side and the disc spinning in its moulded tray on the other. It never
-  stops being the album: under 900px the case stands upright (tray above the hinge,
-  booklet below) instead of losing the tray.
-- **The booklet flips.** Pages are a stack of stapled sheets; a drag lifts the top
-  sheet over its binding and follows the finger, and release past 60px completes the
-  flip (the covers resist past the first and last sheet). A printed folio ("02 / 04")
-  sits between two chevrons for anyone who would rather press, and the left/right
-  arrow keys turn pages too. A release at the end of a flip never also "clicks" what
-  the finger was over.
+- **Open**: the case is only a case — an empty lid with the recess and tabs the booklet
+  came out of, the hinge, and the disc spinning in its moulded tray. The booklet is a
+  separate paper object resting on the open case, slightly off centre and a few degrees
+  askew. Desktop lays the case flat (lid | hinge | tray); under 900px the case stands
+  upright (lid above, tray below) with the booklet lying across the middle and the disc
+  peeking out beneath it.
+- **The booklet opens like a booklet.** Its first sheet is the cover — the album art
+  printed on paper — so the first flip is opening the booklet itself; the folio counts
+  it as page 00. Pages are a stack of stapled sheets over a back cover; a drag lifts
+  the top sheet over its binding and follows the finger, and release past 60px
+  completes the flip (the covers resist past the first and last sheet). A folio chip
+  ("02 / 04") between two chevrons serves anyone who would rather press, and the
+  left/right arrow keys turn pages too. A release at the end of a flip never also
+  "clicks" what the finger was over.
 - Pages: The date, Getting there, Good questions (with the QR), Press play. Pages with
   nothing in them disappear; the date always shows, and the record is always in the tray.
 - The FAQ page carries a QR code of the invite's own URL, so a guest can hand it on.
