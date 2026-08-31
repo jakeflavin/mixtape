@@ -1,12 +1,11 @@
 import { Play } from 'lucide-react'
 import { daysUntil, formatLongDate, formatTime } from '@/lib/format'
 import { useQr } from '@/hooks/useQr'
-import { Disc } from './Disc'
 import type { SaveTheDate } from '@/lib/types'
 
 /*
  * The booklet's pages. Each one is plain content — the booklet owns the frame,
- * the transitions and the tracklist, so a page only says what it says.
+ * the carousel and the dots, so a page only says what it says.
  */
 
 export interface PageProps {
@@ -74,27 +73,15 @@ export function FaqPage({ doc, url }: FaqPageProps) {
   )
 }
 
-export function RecordPage({ doc }: PageProps) {
+export function PlayPage({ doc }: PageProps) {
   const [a, b] = doc.names
   const both = a && b ? `${a} & ${b}` : a || b || 'the two of us'
   return (
     <>
-      <h2 className="page-title">The record</h2>
-      <p className="page-body">
-        Burned by {both}. Track for track, the story so far — the song from the kitchen, the one
-        from the long drive, the one that will clear the floor.
-      </p>
-      <div className="page-disc">
-        <Disc names={doc.names} album={doc.album} spinning />
-      </div>
-    </>
-  )
-}
-
-export function PlayPage({ doc }: PageProps) {
-  return (
-    <>
       <h2 className="page-title">Press play</h2>
+      <p className="page-body">
+        The record in the tray was burned by {both} — track for track, the story so far.
+      </p>
       {doc.note && <p className="page-body">{doc.note}</p>}
       <a className="page-play" href={doc.playlist} target="_blank" rel="noreferrer">
         <Play aria-hidden="true" size={18} />

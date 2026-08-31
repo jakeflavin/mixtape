@@ -34,12 +34,18 @@ without decompressing anything.
   The disc waits underneath so the opening swing reveals it. "Press to open" under it.
 - **Opening**: the lid swings 104° on a perspective hinge (0.8s). The end of the swing is
   a timer, not an animation callback — see the comment in `Invite.tsx`.
-- **Open**: a booklet page on the left, the disc spinning in its tray on the right, and a
-  tracklist underneath: 01 The date, 02 Getting there, 03 Good questions, 04 The record,
-  05 Press play. Left/right arrow keys change tracks. Under 900px the tray folds away and
-  the disc lives on the record page instead.
-- Tracks with nothing in them disappear: no travel notes, no track 02; no FAQs, no
-  track 03; no playlist link, no track 05. The date and the record always show.
+- **Open**: the same case, open — a plastic shell with a rim and a hinge, the booklet
+  paper on one side and the disc spinning in its moulded tray on the other. It never
+  stops being the album: under 900px the case stands upright (tray above the hinge,
+  booklet below) instead of losing the tray.
+- **The booklet flips.** Pages are a stack of stapled sheets; a drag lifts the top
+  sheet over its binding and follows the finger, and release past 60px completes the
+  flip (the covers resist past the first and last sheet). A printed folio ("02 / 04")
+  sits between two chevrons for anyone who would rather press, and the left/right
+  arrow keys turn pages too. A release at the end of a flip never also "clicks" what
+  the finger was over.
+- Pages: The date, Getting there, Good questions (with the QR), Press play. Pages with
+  nothing in them disappear; the date always shows, and the record is always in the tray.
 - The FAQ page carries a QR code of the invite's own URL, so a guest can hand it on.
 - The footer links back to the builder ("Make one for your own wedding").
 - Reduced motion collapses every entrance to a plain appearance and parks the disc.

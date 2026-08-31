@@ -100,36 +100,126 @@ export const ClosedCase = styled.button`
   }
 `
 
+/*
+ * The open album. The shell is the plastic — a rim all the way round, a hinge
+ * between the halves — so what a guest is looking at is still the object they
+ * just opened, with the details printed inside it. Desktop lays the spread
+ * flat (booklet | hinge | tray); a phone holds the case upright instead
+ * (tray above, hinge, booklet below). The tray never disappears.
+ */
 export const OpenCase = styled(motion.article)`
-  width: min(96vw, 940px);
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
+  width: min(96vw, 960px);
 
-  .case-open-body {
+  .case-shell {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: var(--shadow-deep);
+    grid-template-areas: 'booklet hinge tray';
+    grid-template-columns: 1fr 16px 1fr;
+    padding: 12px;
+    border-radius: 14px;
+    background: linear-gradient(
+      160deg,
+      color-mix(in srgb, var(--cover-b) 72%, #000 14%),
+      color-mix(in srgb, var(--cover-b) 55%, #000 30%)
+    );
+    box-shadow:
+      inset 0 0 0 1px rgb(255 255 255 / 0.14),
+      var(--shadow-deep);
   }
 
   .panel {
-    min-height: 460px;
+    border-radius: 6px;
+    overflow: hidden;
+    min-height: 500px;
   }
+
+  /* ---------------------------------------------------------- the booklet */
 
   .booklet {
-    background: var(--surface);
-    padding: clamp(20px, 4vw, 40px);
-    display: flex;
+    grid-area: booklet;
+    position: relative;
+    /* The inside of the lid: dark plastic the paper booklet sits against. */
+    background: color-mix(in srgb, var(--bg) 80%, #000 12%);
+    box-shadow: inset 0 0 24px rgb(0 0 0 / 0.25);
+    padding: 14px 14px 48px;
   }
 
-  .page {
+  .booklet-window {
+    height: 100%;
+    /* Horizontal gestures are ours; the browser keeps vertical scrolling. */
+    touch-action: pan-y;
+    cursor: grab;
+  }
+
+  .booklet-window:active {
+    cursor: grabbing;
+  }
+
+  .booklet-sheets {
+    position: relative;
+    height: 100%;
+    perspective: 1600px;
+  }
+
+  /*
+   * One sheet of the stapled booklet. Turning is nothing but the is-read
+   * class: the sheet lifts over its binding (the left edge) and fades as it
+   * passes vertical, and taking the class off lowers it back. Mid-drag the
+   * component holds the sheet at the finger's angle with an inline transform
+   * and is-held silences the transition, so release animates from wherever
+   * the finger left it.
+   */
+  .sheet {
+    position: absolute;
+    inset: 0;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     gap: 14px;
-    width: 100%;
+    padding: clamp(22px, 4vw, 40px);
+    padding-left: clamp(30px, 4.4vw, 48px); /* the binding gutter */
+    overflow-y: auto;
+    background: var(--surface);
+    border-radius: 2px 8px 8px 2px;
+    box-shadow:
+      /* the gutter's shadow, where the paper folds into the staples */
+      inset 14px 0 16px -12px rgb(0 0 0 / 0.28),
+      2px 2px 6px rgb(0 0 0 / 0.22);
+    transform-origin: left center;
+    backface-visibility: hidden;
+    transition:
+      transform 0.55s cubic-bezier(0.2, 0.7, 0.25, 1),
+      opacity 0.3s ease 0.18s;
+  }
+
+  .sheet.is-read {
+    transform: rotateY(-88deg);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .sheet.is-held {
+    transition: none;
+    user-select: none;
+  }
+
+  /* The staples at the fold, the way every CD booklet is bound. */
+  .sheet::before,
+  .sheet::after {
+    content: '';
+    position: absolute;
+    left: 9px;
+    width: 3px;
+    height: 16px;
+    border-radius: 2px;
+    background: linear-gradient(180deg, rgb(0 0 0 / 0.35), rgb(0 0 0 / 0.15));
+  }
+
+  .sheet::before {
+    top: 26%;
+  }
+
+  .sheet::after {
+    bottom: 26%;
   }
 
   .page-eyebrow {
@@ -215,13 +305,6 @@ export const OpenCase = styled(motion.article)`
     max-width: 18ch;
   }
 
-  .page-disc {
-    display: none;
-    width: min(62vw, 260px);
-    align-self: center;
-    margin-top: 8px;
-  }
-
   .page-play {
     display: inline-flex;
     align-items: center;
@@ -274,27 +357,132 @@ export const OpenCase = styled(motion.article)`
     animation-delay: 0.6s;
   }
 
-  .tray {
-    background:
-      radial-gradient(
-        circle at 50% 46%,
-        color-mix(in srgb, var(--bg) 70%, #000 10%) 0 34%,
-        transparent 35%
-      ),
-      linear-gradient(160deg, var(--surface-hi), color-mix(in srgb, var(--bg) 80%, #000 12%));
+  /* The turn bar: a printed folio between two quiet chevrons, set into the
+   * lid below the paper rather than floating over it. */
+
+  .booklet-nav {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+  }
+
+  .booklet-folio {
+    font-family: var(--font-mono);
+    font-size: var(--font-tiny);
+    letter-spacing: 0.24em;
+    color: var(--dim);
+  }
+
+  .booklet-turn {
     display: grid;
     place-items: center;
-    padding: 9%;
-    box-shadow: inset 0 0 40px rgb(0 0 0 / 0.14);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    color: var(--dim);
+    transition:
+      color 0.2s ease,
+      background 0.2s ease;
   }
 
-  .tray .disc-box {
-    width: min(100%, 340px);
+  .booklet-turn:hover:not(:disabled) {
+    color: var(--text);
+    background: rgb(255 255 255 / 0.06);
   }
 
+  .booklet-turn:disabled {
+    opacity: 0.3;
+    cursor: default;
+  }
+
+  /* ------------------------------------------------------------ the hinge */
+
+  .case-hinge {
+    grid-area: hinge;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-around;
+    background: linear-gradient(
+      90deg,
+      rgb(0 0 0 / 0.35),
+      rgb(255 255 255 / 0.08) 50%,
+      rgb(0 0 0 / 0.35)
+    );
+  }
+
+  .case-hinge i {
+    display: block;
+    width: 100%;
+    height: 34px;
+    border-radius: 3px;
+    background: linear-gradient(
+      90deg,
+      rgb(0 0 0 / 0.45),
+      rgb(255 255 255 / 0.1),
+      rgb(0 0 0 / 0.45)
+    );
+  }
+
+  /* ------------------------------------------------------------- the tray */
+
+  .tray {
+    grid-area: tray;
+    position: relative;
+    display: grid;
+    place-items: center;
+    padding: 7%;
+    background: linear-gradient(
+      160deg,
+      color-mix(in srgb, var(--surface-hi) 60%, var(--bg) 40%),
+      color-mix(in srgb, var(--bg) 78%, #000 14%)
+    );
+    box-shadow: inset 0 0 34px rgb(0 0 0 / 0.16);
+  }
+
+  /* The moulded circle the disc snaps into. */
+  .tray-recess {
+    width: min(100%, 380px);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    padding: 5%;
+    background: color-mix(in srgb, var(--bg) 82%, #000 10%);
+    box-shadow:
+      inset 0 2px 10px rgb(0 0 0 / 0.3),
+      0 1px 0 rgb(255 255 255 / 0.08);
+  }
+
+  .tray-recess .disc-box {
+    width: 100%;
+  }
+
+  /* The thumb notch cut into the tray's lower rim. */
+  .tray-clip {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 64px;
+    height: 10px;
+    border-radius: var(--radius-pill);
+    background: rgb(0 0 0 / 0.28);
+    box-shadow: inset 0 1px 3px rgb(0 0 0 / 0.4);
+  }
+
+  /* A phone holds the case upright: disc above the hinge, booklet below. */
   @media (max-width: 899px) {
-    .case-open-body {
+    .case-shell {
+      grid-template-areas: 'tray' 'hinge' 'booklet';
       grid-template-columns: 1fr;
+      grid-template-rows: auto 16px 1fr;
+      padding: 10px;
     }
 
     .panel {
@@ -302,58 +490,42 @@ export const OpenCase = styled(motion.article)`
     }
 
     .booklet {
-      min-height: 420px;
+      min-height: 460px;
     }
 
     .tray {
+      padding: 18px;
+    }
+
+    .tray-recess {
+      width: min(52vw, 230px);
+    }
+
+    .tray-clip {
       display: none;
     }
 
-    .page-disc {
-      display: block;
+    .case-hinge {
+      flex-direction: row;
+      justify-content: space-around;
+      background: linear-gradient(
+        180deg,
+        rgb(0 0 0 / 0.35),
+        rgb(255 255 255 / 0.08) 50%,
+        rgb(0 0 0 / 0.35)
+      );
     }
-  }
-`
 
-export const Tracklist = styled.nav`
-  ol {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 6px;
-  }
-
-  .track {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 14px;
-    border-radius: var(--radius-pill);
-    border: 1px solid var(--line);
-    color: var(--dim);
-    font-size: var(--font-small);
-    letter-spacing: 0.04em;
-    transition:
-      color 0.2s ease,
-      border-color 0.2s ease,
-      background 0.2s ease;
-  }
-
-  .track:hover {
-    color: var(--text);
-    border-color: var(--dim);
-  }
-
-  .track.is-active {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: var(--ink);
-  }
-
-  .track-number {
-    font-family: var(--font-mono);
-    font-size: var(--font-tiny);
-    opacity: 0.8;
+    .case-hinge i {
+      width: 34px;
+      height: 100%;
+      background: linear-gradient(
+        180deg,
+        rgb(0 0 0 / 0.45),
+        rgb(255 255 255 / 0.1),
+        rgb(0 0 0 / 0.45)
+      );
+    }
   }
 `
 

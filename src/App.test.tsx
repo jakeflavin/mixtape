@@ -47,37 +47,52 @@ describe('routing', () => {
 })
 
 describe('invite', () => {
-  it('opens the case into the booklet and walks the tracklist', async () => {
+  it('opens the case into the booklet and turns its pages', async () => {
     const user = userEvent.setup()
     visit(shareUrl(starterDoc(), 'https://example.test'))
     render(<App />)
 
     await user.click(screen.getByRole('button', { name: /open the case/i }))
-    // Reduced motion is on in jsdom (matchMedia matches nothing), so the case
-    // opens without waiting for the animation.
+    // Reduced motion matches in jsdom, so the case opens without waiting for
+    // the lid swing.
     expect(await screen.findByRole('navigation', { name: /booklet pages/i })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: /saturday|june/i })).toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: /getting there/i }))
+    expect(screen.getByText('01 / 04')).toBeInTheDocument()
+
+    // Sheets off the top of the stack are aria-hidden until turned to, and
+    // the chevron flips one sheet at a time.
+    await user.click(screen.getByRole('button', { name: /next page/i }))
     expect(
       await screen.findByRole('heading', { name: 'Getting there', level: 2 }),
     ).toBeInTheDocument()
     expect(screen.getByText(/rivertown lodge/i)).toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: /press play/i }))
+    await user.click(screen.getByRole('button', { name: /next page/i }))
+    expect(
+      await screen.findByRole('heading', { name: 'Good questions', level: 2 }),
+    ).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: /next page/i }))
     const play = await screen.findByRole('link', { name: /open the playlist/i })
     expect(play).toHaveAttribute('href', starterDoc().playlist)
+    expect(screen.getByText('04 / 04')).toBeInTheDocument()
+
+    // The folio walks back too.
+    await user.click(screen.getByRole('button', { name: /previous page/i }))
+    expect(screen.getByText('03 / 04')).toBeInTheDocument()
   })
 
-  it('drops the travel and questions tracks when those lists are empty', async () => {
+  it('drops the travel and questions pages when those lists are empty', async () => {
     const user = userEvent.setup()
     const doc = { ...starterDoc(), travel: [], faqs: [] }
     visit(shareUrl(doc, 'https://example.test'))
     render(<App />)
     await user.click(screen.getByRole('button', { name: /open the case/i }))
     await screen.findByRole('navigation', { name: /booklet pages/i })
-    expect(screen.queryByRole('button', { name: /getting there/i })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: /good questions/i })).not.toBeInTheDocument()
+    expect(screen.getByText('01 / 02')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: /next page/i }))
+    expect(await screen.findByRole('link', { name: /open the playlist/i })).toBeInTheDocument()
   })
 
   it('writes the genre palette onto the page', () => {

@@ -6,8 +6,8 @@ Read this before any UI change.
 
 The reference is a physical CD in a jewel case, and every screen keeps faith with it: the
 closed case has a spine, a plastic gloss and a hinge; opening it is a lid swinging on a
-perspective hinge that reveals the disc sitting in the tray; the content pages are the
-booklet, navigated by a tracklist. Nothing on the invite looks like a website — no header,
+perspective hinge that reveals the disc sitting in the tray; the content pages are a
+stapled booklet whose sheets lift and flip over the binding. Nothing on the invite looks like a website — no header,
 no cards, no nav bar. The one exception is the small "Made with Mixtape" footer.
 
 The builder, by contrast, IS a website — a plain form in the set's neutral style — because
@@ -65,9 +65,17 @@ global reset also floors CSS animation durations), and the disc is rendered park
 
 - Closed case: `min(84vw, 420px)`, aspect 1.06 — the near-square of a real jewel case,
   spine at 6.5%.
-- Open case: two equal panels to 940px wide; under 900px the tray hides and the booklet
-  stands alone. Cover and disc type scale with container queries (`cqw`), so the same
-  components serve the invite, the builder preview, and any size between.
+- Open case: a plastic shell — a rim all round, a hinge between the halves — with two
+  equal panels to 960px wide. Under 900px the case stands upright: tray, hinge, booklet.
+  The tray never disappears; the album is the interface at every width. Cover and disc
+  type scale with container queries (`cqw`), so the same components serve the invite,
+  the builder preview, and any size between.
+- The booklet is a stack of sheets, each a paper insert with staples at the binding
+  and a gutter shadow. A turn is only the `is-read` class: the sheet rotates over its
+  left edge (perspective on the stack) and fades past vertical, all CSS transitions —
+  release mid-drag animates from wherever the finger left the sheet, because a
+  transition starts from the current computed value. The gesture itself is raw pointer
+  events; motion's drag never engaged against an animated transform target.
 - The booklet page is left-aligned prose with an eyebrow ("Track 03"), a display-face
   title, and body copy capped at 44ch.
 

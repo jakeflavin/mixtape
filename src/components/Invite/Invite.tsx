@@ -1,11 +1,13 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { motion, useReducedMotion } from 'motion/react'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { shareUrl } from '@/lib/codec'
 import { useGenreTheme } from '@/hooks/useGenreTheme'
 import { CoverArt } from './CoverArt'
 import { Disc } from './Disc'
-import { DatePage, FaqPage, PlayPage, RecordPage, TravelPage } from './pages'
-import { Scene, ClosedWrap, ClosedCase, OpenCase, Tracklist, Footer } from './Invite.styled'
+import { DatePage, FaqPage, PlayPage, TravelPage } from './pages'
+import { Scene, ClosedWrap, ClosedCase, OpenCase, Footer } from './Invite.styled'
+import type { PointerEvent as ReactPointerEvent, MouseEvent as ReactMouseEvent } from 'react'
 import type { SaveTheDate } from '@/lib/types'
 import type { ReactNode } from 'react'
 
@@ -13,52 +15,62 @@ export interface InviteProps {
   doc: SaveTheDate
 }
 
-interface Track {
+interface Page {
   id: string
-  title: string
-  page: ReactNode
+  label: string
+  content: ReactNode
 }
 
 /** How long the lid takes to swing open. */
 const OPEN_MS = 800
 
+/** Drag past this many px and letting go turns the page. */
+const SWIPE_DISTANCE = 60
+
+/** Where a read sheet rests, folded at the binding. Matches .sheet.is-read in the CSS. */
+const FLIPPED_DEG = -88
+
 /*
- * The invite a guest opens: a closed jewel case, then an open one — booklet on
- * the left, disc in the tray on the right, pages picked from a tracklist. On a
- * phone the tray folds away and the record becomes one of the pages instead.
+ * The invite a guest opens: a closed jewel case, then the same case open — the
+ * booklet on one side, the disc in its moulded tray on the other, a hinge
+ * between them. It never stops being the album: on a phone the spread stacks
+ * vertically instead of losing the tray. The booklet is a stack of stapled
+ * sheets, and moving through it is turning them — a drag lifts the top sheet
+ * over its binding, and chevrons beside a printed folio serve anyone who
+ * would rather press than flip.
  */
 export function Invite({ doc }: InviteProps) {
   const [phase, setPhase] = useState<'closed' | 'opening' | 'open'>('closed')
-  const [trackIndex, setTrackIndex] = useState(0)
+  const [pageIndex, setPageIndex] = useState(0)
   const reduced = useReducedMotion() ?? false
 
   useGenreTheme(doc.theme, document.documentElement)
 
   const url = useMemo(() => shareUrl(doc), [doc])
 
-  const tracks = useMemo<[Track, ...Track[]]>(() => {
-    const list: Track[] = [{ id: 'date', title: 'The date', page: <DatePage doc={doc} /> }]
+  const pages = useMemo<[Page, ...Page[]]>(() => {
+    const list: Page[] = [{ id: 'date', label: 'The date', content: <DatePage doc={doc} /> }]
     if (doc.travel.length > 0)
-      list.push({ id: 'travel', title: 'Getting there', page: <TravelPage doc={doc} /> })
+      list.push({ id: 'travel', label: 'Getting there', content: <TravelPage doc={doc} /> })
     if (doc.faqs.length > 0)
-      list.push({ id: 'faq', title: 'Good questions', page: <FaqPage doc={doc} url={url} /> })
-    list.push({ id: 'record', title: 'The record', page: <RecordPage doc={doc} /> })
-    if (doc.playlist) list.push({ id: 'play', title: 'Press play', page: <PlayPage doc={doc} /> })
-    return list as [Track, ...Track[]]
+      list.push({ id: 'faq', label: 'Good questions', content: <FaqPage doc={doc} url={url} /> })
+    if (doc.playlist)
+      list.push({ id: 'play', label: 'Press play', content: <PlayPage doc={doc} /> })
+    return list as [Page, ...Page[]]
   }, [doc, url])
 
-  const current = tracks[trackIndex] ?? tracks[0]
+  const lastIndex = pages.length - 1
+  const turnTo = (index: number) => setPageIndex(Math.max(0, Math.min(index, lastIndex)))
 
   useEffect(() => {
     if (phase !== 'open') return
     const handleArrows = (event: KeyboardEvent) => {
-      if (event.key === 'ArrowRight')
-        setTrackIndex((index) => Math.min(index + 1, tracks.length - 1))
-      if (event.key === 'ArrowLeft') setTrackIndex((index) => Math.max(index - 1, 0))
+      if (event.key === 'ArrowRight') setPageIndex((i) => Math.min(i + 1, lastIndex))
+      if (event.key === 'ArrowLeft') setPageIndex((i) => Math.max(i - 1, 0))
     }
     window.addEventListener('keydown', handleArrows)
     return () => window.removeEventListener('keydown', handleArrows)
-  }, [phase, tracks.length])
+  }, [phase, lastIndex])
 
   const open = () => setPhase(reduced ? 'open' : 'opening')
 
@@ -70,6 +82,59 @@ export function Invite({ doc }: InviteProps) {
     const timer = window.setTimeout(() => setPhase('open'), OPEN_MS + 50)
     return () => window.clearTimeout(timer)
   }, [phase])
+
+  /*
+   * The page turn is handled by hand with pointer events rather than motion's
+   * drag gesture, which never engaged here (its pan session and an animated
+   * transform target fight over the same property). Down/move/up on the
+   * window is enough: the top sheet tilts with the finger, and release either
+   * completes the flip or lets the sheet fall back.
+   */
+  const [drag, setDrag] = useState<{ dx: number; width: number } | null>(null)
+  const dragFrom = useRef(0)
+  const swallowClick = useRef(false)
+
+  /** How far a held sheet has lifted, in degrees — null when the finger is not on it. */
+  const sheetRotation = (index: number): number | null => {
+    if (drag === null) return null
+    // Dragging left lifts the current sheet toward its flipped position…
+    if (drag.dx < 0 && index === pageIndex) return Math.max(-80, (drag.dx / drag.width) * 150)
+    // …dragging right lowers the last-read sheet back down.
+    if (drag.dx > 0 && index === pageIndex - 1)
+      return Math.min(0, FLIPPED_DEG + (drag.dx / drag.width) * 150)
+    return null
+  }
+
+  const handlePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (event.pointerType === 'mouse' && event.button !== 0) return
+    dragFrom.current = event.clientX
+    setDrag({ dx: 0, width: event.currentTarget.getBoundingClientRect().width || 360 })
+  }
+
+  const handlePointerMove = (event: ReactPointerEvent) => {
+    if (drag === null) return
+    let dx = event.clientX - dragFrom.current
+    // The covers resist past the first and last page, like real paper would.
+    if ((pageIndex === 0 && dx > 0) || (pageIndex === lastIndex && dx < 0)) dx /= 3
+    setDrag({ dx, width: drag.width })
+  }
+
+  const handlePointerEnd = () => {
+    if (drag === null) return
+    if (Math.abs(drag.dx) > 10) swallowClick.current = true
+    setDrag(null)
+    if (drag.dx < -SWIPE_DISTANCE) turnTo(pageIndex + 1)
+    else if (drag.dx > SWIPE_DISTANCE) turnTo(pageIndex - 1)
+  }
+
+  // A release at the end of a swipe would otherwise also "click" whatever the
+  // finger happened to be over — usually the play button.
+  const handleClickCapture = (event: ReactMouseEvent) => {
+    if (!swallowClick.current) return
+    swallowClick.current = false
+    event.preventDefault()
+    event.stopPropagation()
+  }
 
   /*
    * The two scenes swap on a plain conditional with enter-only animations.
@@ -114,42 +179,90 @@ export function Invite({ doc }: InviteProps) {
           transition={{ duration: reduced ? 0 : 0.45, ease: 'easeOut' }}
           aria-label="Save-the-date booklet"
         >
-          <div className="case-open-body">
-            <div className="panel booklet">
-              {/* The key remounts the page, so switching tracks replays the
-                  enter animation — the old page just leaves. */}
-              <motion.div
-                key={current.id}
-                className="page"
-                initial={reduced ? false : { opacity: 0, x: 28 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: reduced ? 0 : 0.28, ease: 'easeOut' }}
+          <div className="case-shell">
+            <div className="panel booklet" aria-roledescription="carousel">
+              <div
+                className="booklet-window"
+                onPointerDown={handlePointerDown}
+                onPointerMove={handlePointerMove}
+                onPointerUp={handlePointerEnd}
+                onPointerCancel={handlePointerEnd}
+                onPointerLeave={handlePointerEnd}
+                onClickCapture={handleClickCapture}
               >
-                <p className="page-eyebrow">Track {String(trackIndex + 1).padStart(2, '0')}</p>
-                {current.page}
-              </motion.div>
-            </div>
-            <div className="panel tray" aria-hidden="true">
-              <Disc names={doc.names} album={doc.album} spinning />
-            </div>
-          </div>
-          <Tracklist aria-label="Booklet pages">
-            <ol>
-              {tracks.map((track, index) => (
-                <li key={track.id}>
+                {/* A stapled booklet, not a strip: every page is a sheet in a
+                    stack, and a turn lifts the top sheet over its binding.
+                    Read sheets sit flipped at the spine; a class change is the
+                    whole turn, so nothing waits on an animation callback. */}
+                <div className="booklet-sheets">
+                  {pages.map((page, index) => {
+                    const held = sheetRotation(index)
+                    const read = index < pageIndex
+                    const depth = Math.max(0, Math.min(index - pageIndex, 3))
+                    return (
+                      <section
+                        key={page.id}
+                        className={['sheet', read ? 'is-read' : '', held !== null ? 'is-held' : '']
+                          .filter(Boolean)
+                          .join(' ')}
+                        aria-label={page.label}
+                        aria-hidden={index !== pageIndex}
+                        style={{
+                          zIndex: pages.length - index,
+                          transform:
+                            held !== null
+                              ? `rotateY(${held}deg)`
+                              : read
+                                ? undefined
+                                : `translateX(${depth * 2}px)`,
+                          opacity: held !== null ? 1 : undefined,
+                        }}
+                      >
+                        <p className="page-eyebrow">Track {String(index + 1).padStart(2, '0')}</p>
+                        {page.content}
+                      </section>
+                    )
+                  })}
+                </div>
+              </div>
+              {lastIndex > 0 && (
+                <nav className="booklet-nav" aria-label="Booklet pages">
                   <button
                     type="button"
-                    className={index === trackIndex ? 'track is-active' : 'track'}
-                    aria-current={index === trackIndex ? 'page' : undefined}
-                    onClick={() => setTrackIndex(index)}
+                    className="booklet-turn is-prev"
+                    aria-label="Previous page"
+                    disabled={pageIndex === 0}
+                    onClick={() => turnTo(pageIndex - 1)}
                   >
-                    <span className="track-number">{String(index + 1).padStart(2, '0')}</span>
-                    <span>{track.title}</span>
+                    <ChevronLeft size={18} aria-hidden="true" />
                   </button>
-                </li>
-              ))}
-            </ol>
-          </Tracklist>
+                  <span className="booklet-folio">
+                    {String(pageIndex + 1).padStart(2, '0')} /{' '}
+                    {String(pages.length).padStart(2, '0')}
+                  </span>
+                  <button
+                    type="button"
+                    className="booklet-turn is-next"
+                    aria-label="Next page"
+                    disabled={pageIndex === lastIndex}
+                    onClick={() => turnTo(pageIndex + 1)}
+                  >
+                    <ChevronRight size={18} aria-hidden="true" />
+                  </button>
+                </nav>
+              )}
+            </div>
+            <div className="case-hinge" aria-hidden="true">
+              <i />
+              <i />
+            </div>
+            <div className="panel tray" aria-hidden="true">
+              <div className="tray-recess">
+                <Disc names={doc.names} album={doc.album} spinning />
+              </div>
+              <span className="tray-clip" />
+            </div>
+          </div>
         </OpenCase>
       )}
       <Footer>
