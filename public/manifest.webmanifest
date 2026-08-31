@@ -1,0 +1,15 @@
+{
+  "name": "Mixtape",
+  "short_name": "Mixtape",
+  "description": "A wedding save-the-date shaped like a CD. Open the case, read the date, press play. Nothing is stored: the link is the invite.",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "background_color": "#f3f1ec",
+  "theme_color": "#f3f1ec",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

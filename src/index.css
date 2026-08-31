@@ -1,0 +1,161 @@
+/*
+ * Mixtape — a wedding save-the-date shaped like a CD in a jewel case.
+ *
+ * Only the ground and the reset live here, because only those must be right on
+ * the first paint. The builder runs on the neutral palette below, a light/dark
+ * pair switched on data-theme like the rest of the set. An invite runs on one
+ * of ten genre palettes instead; those are named looks, not light/dark pairs,
+ * so lib/themes.ts writes them onto :root as inline custom properties, which
+ * outrank these defaults. index.html paints each genre's ground before this
+ * file even applies — the tiny table there and lib/themes.ts are the same
+ * numbers, and changing either changes both.
+ */
+
+:root {
+  --font-sans:
+    ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue',
+    Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+  --font-display: var(--font-sans);
+  --display-tracking: 0.01em;
+  --display-transform: none;
+
+  --font-body: 15px;
+  --font-small: 13px;
+  --font-tiny: 12px;
+
+  --bg: #f3f1ec;
+  --surface: #fdfcf9;
+  --surface-hi: #eceae3;
+  --line: #ddd9cf;
+  --text: #1d1b16;
+  --dim: #6f6a5e;
+  --ink: #fdfcf9;
+
+  --accent: #b3502d;
+  --accent-hi: #944023;
+
+  --danger: #b3261e;
+
+  /* Cover and disc tokens. The builder shows previews, so they need defaults. */
+  --cover-a: #e9e2cf;
+  --cover-b: #cfc5a6;
+  --cover-text: #33301f;
+  --cover-dim: #6d6750;
+  --disc-a: #e0d8bf;
+  --disc-b: #b3a983;
+  --disc-text: #33301f;
+
+  --radius: 12px;
+  --radius-lg: 18px;
+  --radius-pill: 999px;
+
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.05), 0 10px 30px rgb(0 0 0 / 0.1);
+  --shadow-deep: 0 2px 4px rgb(0 0 0 / 0.12), 0 24px 60px rgb(0 0 0 / 0.28);
+
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  --bg: #16140f;
+  --surface: #211e18;
+  --surface-hi: #2c2921;
+  --line: #3b372d;
+  --text: #f1eee6;
+  --dim: #a29b8b;
+  --ink: #16140f;
+
+  --accent: #e07a4f;
+  --accent-hi: #f0946c;
+
+  --danger: #ff8a80;
+
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.4), 0 10px 30px rgb(0 0 0 / 0.45);
+  --shadow-deep: 0 2px 4px rgb(0 0 0 / 0.5), 0 24px 60px rgb(0 0 0 / 0.6);
+
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: var(--font-body);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100dvh;
+}
+
+h1,
+h2,
+h3,
+h4,
+p,
+figure,
+fieldset {
+  margin: 0;
+}
+
+ul,
+ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  padding: 0;
+}
+
+a {
+  color: inherit;
+}
+
+img,
+svg,
+canvas {
+  display: block;
+  max-width: 100%;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["react", "typescript", "oxc"],
+  "rules": {
+    "react/rules-of-hooks": "error",
+    "react/only-export-components": ["warn", { "allowConstantExport": true }]
+  },
+  "overrides": [
+    // A widget file is one widget: its body, and the record that tells the registry how to
+    // render, edit and describe it. Splitting the two to keep Fast Refresh happy would double
+    // the file count and move a component's own field list away from the component.
+    {
+      "files": ["src/components/widgets/*.tsx"],
+      "rules": { "react/only-export-components": "off" }
+    }
+  ]
+}

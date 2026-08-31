@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 12">
+  <!-- The disc: a CD, its label ring, and the hole. -->
+  <rect width="12" height="12" rx="2.6" fill="rgb(179 80 45)"/>
+  <circle cx="6" cy="6" r="4.5" fill="rgb(244 241 232)"/>
+  <circle cx="6" cy="6" r="2.025" fill="none" stroke="rgb(179 80 45)" stroke-width="0.5499999999999998"/>
+  <circle cx="6" cy="6" r="1.05" fill="rgb(179 80 45)"/>
+</svg>

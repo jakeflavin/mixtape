@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Mixtape — a save-the-date you press like an album</title>
+    <meta
+      name="description"
+      content="A wedding save-the-date shaped like a CD. Guests open the case, read the date, and press play on your playlist. No accounts and nothing stored: the link is the invite."
+    />
+
+    <!-- Link previews. The image is the app's own cover shot, served from the directory
+         that hosts it; crawlers need an absolute URL and will not follow a relative one. -->
+    <meta property="og:title" content="Mixtape — a save-the-date you press like an album" />
+    <meta
+      property="og:description"
+      content="A wedding save-the-date shaped like a CD. Guests open the case, read the date, and press play on your playlist. No accounts and nothing stored: the link is the invite."
+    />
+    <meta property="og:site_name" content="Jake's Portfolio" />
+    <meta property="og:image" content="https://portfolio-4b9fe.web.app/images/mixtape-cover.jpg" />
+    <meta property="og:image:alt" content="Mixtape — a save-the-date you press like an album" />
+    <meta property="og:url" content="https://portfolio-4b9fe.web.app/mixtape/" />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Mixtape — a save-the-date you press like an album" />
+    <meta
+      name="twitter:description"
+      content="A wedding save-the-date shaped like a CD. Guests open the case, read the date, and press play on your playlist. No accounts and nothing stored: the link is the invite."
+    />
+    <meta name="twitter:image" content="https://portfolio-4b9fe.web.app/images/mixtape-cover.jpg" />
+    <meta name="twitter:image:alt" content="Mixtape — a save-the-date you press like an album" />
+    <link rel="canonical" href="https://portfolio-4b9fe.web.app/mixtape/" />
+
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="theme-color" content="#f3f1ec" />
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/icon-180.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Mixtape" />
+
+    <!--
+      Resolves the ground before the first paint. An invite's look rides in the link as
+      `t`, because the full document is a compressed blob this script cannot afford to
+      unpack. The grounds below are copies of lib/themes.ts — the same numbers, and
+      changing either changes both. Without this a jazz invite paints cream for a frame
+      before going navy, which is the first thing every guest would see.
+    -->
+    <script>
+      try {
+        var grounds = {
+          indie: ['#f4f1e8', '#2d2a22', 'light'],
+          rock: ['#141212', '#f2eeea', 'dark'],
+          pop: ['#fdeef4', '#3b1226', 'light'],
+          hiphop: ['#101010', '#f5f1e6', 'dark'],
+          country: ['#f5ecdd', '#3a2b1a', 'light'],
+          jazz: ['#101623', '#eef0ea', 'dark'],
+          classical: ['#f8f5ee', '#2c2418', 'light'],
+          electronic: ['#0b0e14', '#e8f4ff', 'dark'],
+          punk: ['#f4f2ef', '#151312', 'light'],
+          disco: ['#170f22', '#f6effc', 'dark'],
+        }
+        var params = new URLSearchParams(location.search)
+        var ground = grounds[params.get('t')]
+        var root = document.documentElement
+        if (ground && params.get('m') && params.get('edit') !== '1') {
+          root.style.setProperty('--bg', ground[0])
+          root.style.setProperty('--text', ground[1])
+          root.style.colorScheme = ground[2]
+        } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          root.dataset.theme = 'dark'
+        }
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
