@@ -30,16 +30,18 @@ without decompressing anything.
 
 ## The invite
 
-- **Closed**: the jewel case front — spine, plastic gloss, cover art from the document.
-  The disc waits underneath so the opening swing reveals it. "Press to open" under it.
-- **Opening**: the lid swings 104° on a perspective hinge (0.8s). The end of the swing is
-  a timer, not an animation callback — see the comment in `Invite.tsx`.
+- **One case, one animation.** The open spread — lid, hinge, tray, disc — is mounted
+  from the first frame, folded shut: a clip shows only the tray half with the cover
+  lying on it and the hinge reading as the spine. Pressing it plays one continuous CSS
+  choreography (`is-open` is the entire state): the cover swings 180° over the hinge,
+  its paper back showing past edge-on, while the case unfolds to full width, and the
+  booklet settles onto the lid as the cover lands (~0.7s in). No scene swap, no timers.
 - **Open**: the case is only a case — an empty lid with the recess and tabs the booklet
   came out of, the hinge, and the disc spinning in its moulded tray. The booklet is a
   separate paper object resting on the open case, slightly off centre and a few degrees
-  askew. Desktop lays the case flat (lid | hinge | tray); under 900px the case stands
-  upright (lid above, tray below) with the booklet lying across the middle and the disc
-  peeking out beneath it.
+  askew. Desktop lays the case flat (lid | hinge | tray); under 900px the case is folded
+  upward when shut and unfolds to stand upright (lid above, tray below), the booklet
+  lying across the middle with the disc peeking out beneath it.
 - **The booklet opens like a booklet.** Its first sheet is the cover — the album art
   printed on paper — so the first flip is opening the booklet itself; the folio counts
   it as page 00. Pages are a stack of stapled sheets over a back cover; a drag lifts

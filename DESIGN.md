@@ -47,16 +47,23 @@ classical, punk. `color-scheme` follows, so form controls and scrollbars match.
 
 ## Motion
 
-The `motion` library runs every entrance; CSS keyframes run the loops (disc spin,
-equalizer). Timings: lid swing 0.8s with a hard-in ease, scene entrances ~0.45s, page
-swaps 0.28s. Loops are slow and quiet — the disc takes 9s per revolution.
+The `motion` library runs only the page-load entrance; CSS keyframes run the loops
+(disc spin, equalizer) and CSS transitions run everything else — including the whole
+case-opening choreography, which is one `is-open` class: the clip unfolds (0.95s), the
+cover swings 180° with its two faces swapped by an instant opacity flip at edge-on
+(0.42s — backface culling fails against the front face's container query, see the
+comment in the styled file), and the booklet settles in at 0.7s via transition-delay.
+Page flips are 0.55s. Loops are slow and quiet — the disc takes 9s per revolution.
 
 Two hard-learned rules, both commented in `Invite.tsx`:
 
 - **No AnimatePresence.** Exit choreography waits on completion callbacks that React 19's
   StrictMode double-mount orphans, and a swap that waits on one freezes the invite. Scene
   and page changes are plain conditionals/remounts with enter-only animations.
-- **Timers end phases, not animation callbacks**, for the same reason.
+- **Nothing waits on an animation callback.** State is a boolean or an index; every
+  choreography is CSS transitions and delays keyed off a class, so there is no
+  completion event to lose. (The reduced-motion reset floors durations but not delays —
+  the styled file zeroes those explicitly.)
 
 `prefers-reduced-motion` collapses everything: entrances become plain appearances (the
 global reset also floors CSS animation durations), and the disc is rendered parked.

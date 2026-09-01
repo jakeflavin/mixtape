@@ -9,110 +9,54 @@ export const Scene = styled.main`
   justify-content: center;
   gap: 20px;
   padding: 24px 16px calc(16px + env(safe-area-inset-bottom));
-`
-
-export const ClosedWrap = styled(motion.div)`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 18px;
 
   .case-hint {
     font-size: var(--font-small);
     letter-spacing: 0.22em;
     text-transform: uppercase;
     color: var(--dim);
-  }
-`
-
-export const ClosedCase = styled.button`
-  position: relative;
-  width: min(84vw, 420px);
-  aspect-ratio: 1.06;
-  perspective: 1400px;
-  border-radius: 6px;
-  transition: transform 0.35s ease;
-
-  &:hover {
-    transform: translateY(-4px) rotateX(2deg) rotateY(-3deg);
+    transition: opacity 0.3s ease;
   }
 
-  &:disabled {
-    cursor: default;
-  }
-
-  .case-spine {
-    position: absolute;
-    inset: 0 auto 0 0;
-    width: 6.5%;
-    border-radius: 6px 0 0 6px;
-    background: linear-gradient(
-      90deg,
-      color-mix(in srgb, var(--cover-b) 70%, #000 30%),
-      var(--cover-b)
-    );
-    box-shadow: inset -2px 0 3px rgb(0 0 0 / 0.25);
-  }
-
-  /* The disc waits under the lid, so the open swing reveals it. */
-  .case-under {
-    position: absolute;
-    inset: 5% 4% 5% 10%;
-    display: grid;
-    place-items: center;
-    z-index: 1;
-    border-radius: 0 6px 6px 0;
-    background: color-mix(in srgb, var(--cover-b) 55%, #000 12%);
-  }
-
-  .case-under .disc-box {
-    width: 86%;
-  }
-
-  .case-face {
-    position: absolute;
-    inset: 0 0 0 6.5%;
-    z-index: 2;
-    display: block;
-    container-type: inline-size;
-    transform-origin: left center;
-    transform-style: preserve-3d;
-    backface-visibility: hidden;
-    border-radius: 0 6px 6px 0;
-    overflow: hidden;
-    box-shadow: var(--shadow-deep);
-  }
-
-  /* The jewel case's plastic: a diagonal sheen and a hard little edge. */
-  .case-gloss {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-      115deg,
-      rgb(255 255 255 / 0.28) 0%,
-      rgb(255 255 255 / 0.06) 18%,
-      transparent 32%,
-      transparent 68%,
-      rgb(255 255 255 / 0.1) 100%
-    );
-    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.16);
-    pointer-events: none;
+  .case-hint.is-open {
+    opacity: 0;
   }
 `
 
 /*
- * The open album. The case is only a case — an empty lid with the tabs and
- * recess the booklet came out of, the hinge, and the tray holding the disc —
- * and the booklet is a separate paper object resting on it, slightly off
- * centre and slightly askew, the way one actually lands when you take it out.
+ * The album. One element tree serves both states: the open spread — lid,
+ * hinge, tray, disc — is mounted from the first frame, and `is-open` is the
+ * whole transition. Shut, .case-clip crops the shell to the tray half (the
+ * hinge showing as the spine) and re-centres it; the front cover lies on the
+ * tray. Opening is one CSS choreography: the clip unfolds the case to full
+ * width while the cover swings 180° over the hinge — its paper back showing
+ * mid-flight — and the booklet settles onto the lid as the cover lands.
  * Desktop lays the case flat (lid | hinge | tray); a phone holds it upright
  * (lid above, hinge, tray below) with the booklet lying across the middle.
  */
 export const OpenCase = styled(motion.article)`
+  /* The booklet positions itself against this box, not the viewport. */
+  position: relative;
   width: min(96vw, 960px);
+
+  /* Folded shut: only the tray half and a sliver of hinge-as-spine show,
+   * shifted so the visible half sits centred in the scene. */
+  .case-clip {
+    clip-path: inset(0 0 0 calc(50% - 22px) round 14px);
+    transform: translateX(-24%);
+    transition:
+      clip-path 0.95s cubic-bezier(0.6, 0, 0.25, 1),
+      transform 0.95s cubic-bezier(0.6, 0, 0.25, 1);
+  }
+
+  &.is-open .case-clip {
+    clip-path: inset(0 0 0 0 round 14px);
+    transform: none;
+  }
 
   .case-shell {
     position: relative;
+    perspective: 1700px;
     display: grid;
     grid-template-areas: 'lid hinge tray';
     grid-template-columns: 1fr 16px 1fr;
@@ -249,6 +193,71 @@ export const OpenCase = styled(motion.article)`
     box-shadow: inset 0 1px 3px rgb(0 0 0 / 0.4);
   }
 
+  /* ------------------------------------------------------------ the cover
+   * The front cover starts lying on the tray and swings over the hinge into
+   * the lid. Two faces: the art, and the paper back that shows mid-flight.
+   * Once landed it fades away over the identical real lid beneath. */
+
+  .case-cover {
+    position: absolute;
+    z-index: 5;
+    top: 12px;
+    bottom: 12px;
+    right: 12px;
+    left: calc(50% + 8px);
+    transform-origin: left center;
+    transform-style: preserve-3d;
+    border-radius: 6px;
+    transition:
+      transform 0.95s cubic-bezier(0.6, 0, 0.25, 1),
+      opacity 0.3s ease 0.95s;
+  }
+
+  &.is-open .case-cover {
+    transform: rotateY(-180deg);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* The two faces swap the instant the cover passes edge-on. Backface
+   * culling would be the obvious tool, but the front face's container query
+   * and overflow clipping make browsers flatten it out of the 3D context —
+   * so the swap is an instant opacity flip timed to the swing instead. */
+  .cover-front,
+  .cover-back {
+    position: absolute;
+    inset: 0;
+    border-radius: 6px;
+    overflow: hidden;
+    transition: opacity 0s linear 0.42s;
+  }
+
+  .cover-front {
+    container-type: inline-size;
+    box-shadow: var(--shadow);
+  }
+
+  .cover-back {
+    opacity: 0;
+    transform: rotateY(180deg);
+    /* A touch lighter than the lid it lands on, so the second half of the
+     * swing stays visible, then the whole cover fades out over the lid. */
+    background: linear-gradient(
+      160deg,
+      color-mix(in srgb, var(--surface-hi) 45%, var(--bg) 55%),
+      color-mix(in srgb, var(--bg) 88%, #000 8%)
+    );
+    box-shadow: inset 0 0 24px rgb(0 0 0 / 0.2);
+  }
+
+  &.is-open .cover-front {
+    opacity: 0;
+  }
+
+  &.is-open .cover-back {
+    opacity: 1;
+  }
+
   /* ----------------------------------------------------------- the booklet
    * A separate object lying on the open case: off centre, a few degrees
    * askew, throwing its own shadow onto the plastic. */
@@ -260,8 +269,23 @@ export const OpenCase = styled(motion.article)`
     bottom: 8%;
     left: 4.5%;
     width: 52%;
-    transform: rotate(-3.2deg);
     filter: drop-shadow(0 16px 26px rgb(0 0 0 / 0.38));
+    /* Shut, the booklet waits inside the case: invisible, lifted a touch. */
+    visibility: hidden;
+    opacity: 0;
+    transform: rotate(-1deg) translateY(-18px) scale(1.05);
+    transition:
+      opacity 0.45s ease,
+      transform 0.55s cubic-bezier(0.2, 0.7, 0.25, 1),
+      visibility 0s;
+  }
+
+  &.is-open .booklet {
+    visibility: visible;
+    opacity: 1;
+    transform: rotate(-3.2deg);
+    /* It lands just as the cover finishes its swing. */
+    transition-delay: 0.7s;
   }
 
   .booklet-window {
@@ -545,6 +569,20 @@ export const OpenCase = styled(motion.article)`
     cursor: default;
   }
 
+  @media (prefers-reduced-motion: reduce) {
+    .case-clip,
+    .case-cover,
+    .cover-front,
+    .cover-back,
+    .booklet {
+      transition: none;
+    }
+
+    &.is-open .booklet {
+      transition-delay: 0s;
+    }
+  }
+
   /* A phone holds the case upright — lid above the hinge, tray below — and
    * the booklet lies across the middle, still its own object. */
   @media (max-width: 899px) {
@@ -581,7 +619,38 @@ export const OpenCase = styled(motion.article)`
       bottom: 33%;
       left: 5%;
       width: 90%;
+    }
+
+    &.is-open .booklet {
       transform: rotate(-2.4deg);
+    }
+
+    /* Shut, a phone case is folded upward: the tray half shows, the hinge
+     * along its top edge as the spine. */
+    .case-clip {
+      clip-path: inset(calc(50% - 20px) 0 0 0 round 14px);
+      transform: translateY(-24%);
+    }
+
+    &.is-open .case-clip {
+      clip-path: inset(0 0 0 0 round 14px);
+      transform: none;
+    }
+
+    .case-cover {
+      top: calc(50% + 7px);
+      bottom: 10px;
+      left: 10px;
+      right: 10px;
+      transform-origin: center top;
+    }
+
+    &.is-open .case-cover {
+      transform: rotateX(180deg);
+    }
+
+    .cover-back {
+      transform: rotateX(180deg);
     }
   }
 `

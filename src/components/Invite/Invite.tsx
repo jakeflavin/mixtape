@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { motion, useReducedMotion } from 'motion/react'
+import { useReducedMotion } from 'motion/react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { shareUrl } from '@/lib/codec'
 import { useGenreTheme } from '@/hooks/useGenreTheme'
 import { CoverArt } from './CoverArt'
 import { Disc } from './Disc'
 import { DatePage, FaqPage, PlayPage, TravelPage } from './pages'
-import { Scene, ClosedWrap, ClosedCase, OpenCase, Footer } from './Invite.styled'
+import { Scene, OpenCase, Footer } from './Invite.styled'
 import type { PointerEvent as ReactPointerEvent, MouseEvent as ReactMouseEvent } from 'react'
 import type { SaveTheDate } from '@/lib/types'
 import type { ReactNode } from 'react'
@@ -21,9 +21,6 @@ interface Page {
   content: ReactNode
 }
 
-/** How long the lid takes to swing open. */
-const OPEN_MS = 800
-
 /** Drag past this many px and letting go turns the page. */
 const SWIPE_DISTANCE = 60
 
@@ -31,16 +28,20 @@ const SWIPE_DISTANCE = 60
 const FLIPPED_DEG = -88
 
 /*
- * The invite a guest opens: a closed jewel case, then the same case open — the
- * booklet on one side, the disc in its moulded tray on the other, a hinge
- * between them. It never stops being the album: on a phone the spread stacks
- * vertically instead of losing the tray. The booklet is a stack of stapled
- * sheets, and moving through it is turning them — a drag lifts the top sheet
- * over its binding, and chevrons beside a printed folio serve anyone who
- * would rather press than flip.
+ * The invite a guest opens. There is only ever one case: the open spread —
+ * lid, hinge, tray, disc — is mounted from the first frame, folded shut. Shut,
+ * a clip shows just the tray half with the cover lying on it and the hinge
+ * reading as the spine. Pressing it plays one continuous, class-driven CSS
+ * choreography: the cover swings 180° over the hinge (showing its paper back
+ * mid-flight) while the case unfolds to full width, and the booklet settles
+ * onto the lid as the cover lands. No scene swap, no timers — just is-open.
+ *
+ * The booklet is a stack of stapled sheets, and moving through it is turning
+ * them — a drag lifts the top sheet over its binding, and chevrons beside a
+ * printed folio serve anyone who would rather press than flip.
  */
 export function Invite({ doc }: InviteProps) {
-  const [phase, setPhase] = useState<'closed' | 'opening' | 'open'>('closed')
+  const [opened, setOpened] = useState(false)
   const [pageIndex, setPageIndex] = useState(0)
   const reduced = useReducedMotion() ?? false
 
@@ -68,25 +69,14 @@ export function Invite({ doc }: InviteProps) {
   const turnTo = (index: number) => setPageIndex(Math.max(0, Math.min(index, lastIndex)))
 
   useEffect(() => {
-    if (phase !== 'open') return
+    if (!opened) return
     const handleArrows = (event: KeyboardEvent) => {
       if (event.key === 'ArrowRight') setPageIndex((i) => Math.min(i + 1, lastIndex))
       if (event.key === 'ArrowLeft') setPageIndex((i) => Math.max(i - 1, 0))
     }
     window.addEventListener('keydown', handleArrows)
     return () => window.removeEventListener('keydown', handleArrows)
-  }, [phase, lastIndex])
-
-  const open = () => setPhase(reduced ? 'open' : 'opening')
-
-  // The lid swing runs for a fixed time, so a timer is the reliable end of it —
-  // motion's onAnimationComplete is tied to one animation instance and a
-  // re-render mid-swing (the button disabling) can orphan it.
-  useEffect(() => {
-    if (phase !== 'opening') return
-    const timer = window.setTimeout(() => setPhase('open'), OPEN_MS + 50)
-    return () => window.clearTimeout(timer)
-  }, [phase])
+  }, [opened, lastIndex])
 
   /*
    * The page turn is handled by hand with pointer events rather than motion's
@@ -140,54 +130,20 @@ export function Invite({ doc }: InviteProps) {
     event.preventDefault()
     event.stopPropagation()
   }
-
-  /*
-   * The two scenes swap on a plain conditional with enter-only animations.
-   * AnimatePresence is deliberately absent: its exit choreography relies on
-   * completion callbacks that React 19's StrictMode double-mount orphans, and
-   * a swap that waits on one freezes the whole invite. An instant unmount
-   * after the lid has already swung is not a visible loss.
-   */
   return (
     <Scene>
-      {phase !== 'open' ? (
-        <ClosedWrap
-          initial={reduced ? false : { opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: reduced ? 0 : 0.5 }}
-        >
-          <ClosedCase
-            type="button"
-            onClick={open}
-            aria-label="Open the case"
-            disabled={phase === 'opening'}
-          >
-            <span className="case-spine" aria-hidden="true" />
-            <motion.span
-              className="case-face"
-              animate={phase === 'opening' ? { rotateY: -104, opacity: 0.4 } : { rotateY: 0 }}
-              transition={{ duration: OPEN_MS / 1000, ease: [0.6, 0, 0.2, 1] }}
-            >
-              <CoverArt doc={doc} />
-              <span className="case-gloss" aria-hidden="true" />
-            </motion.span>
-            <span className="case-under" aria-hidden="true">
-              <Disc names={doc.names} album={doc.album} spinning={false} />
-            </span>
-          </ClosedCase>
-          <p className="case-hint">Press to open</p>
-        </ClosedWrap>
-      ) : (
-        <OpenCase
-          initial={reduced ? false : { opacity: 0, scale: 0.94, y: 16 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ duration: reduced ? 0 : 0.45, ease: 'easeOut' }}
-          aria-label="Save-the-date booklet"
-        >
+      <OpenCase
+        className={opened ? 'is-open' : ''}
+        initial={reduced ? false : { opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: reduced ? 0 : 0.5 }}
+        aria-label="Save-the-date booklet"
+      >
+        {/* Everything plastic lives inside the clip, which is what folds and
+            unfolds the case. The booklet sits outside it so its corners and
+            shadow can overhang the shell. */}
+        <div className="case-clip">
           <div className="case-shell">
-            {/* The case is only a case: an empty lid the booklet came out of,
-                the hinge, and the tray holding the disc. The booklet is its
-                own object, resting on the open case slightly askew. */}
             <div className="panel lid" aria-hidden="true">
               <span className="lid-recess" />
               <span className="lid-tab is-top" />
@@ -199,89 +155,106 @@ export function Invite({ doc }: InviteProps) {
             </div>
             <div className="panel tray" aria-hidden="true">
               <div className="tray-recess">
-                <Disc names={doc.names} album={doc.album} spinning />
+                <Disc names={doc.names} album={doc.album} spinning={opened} />
               </div>
               <span className="tray-clip" />
             </div>
-            <div className="booklet" aria-roledescription="carousel">
-              <div
-                className="booklet-window"
-                onPointerDown={handlePointerDown}
-                onPointerMove={handlePointerMove}
-                onPointerUp={handlePointerEnd}
-                onPointerCancel={handlePointerEnd}
-                onPointerLeave={handlePointerEnd}
-                onClickCapture={handleClickCapture}
-              >
-                {/* A stapled booklet: every page is a sheet in a stack, and a
-                    turn lifts the top sheet over its binding. Read sheets sit
-                    flipped at the spine; a class change is the whole turn, so
-                    nothing waits on an animation callback. */}
-                <div className="booklet-sheets">
-                  {pages.map((page, index) => {
-                    const held = sheetRotation(index)
-                    const read = index < pageIndex
-                    const depth = Math.max(0, Math.min(index - pageIndex, 3))
-                    return (
-                      <section
-                        key={page.id}
-                        className={[
-                          'sheet',
-                          page.id === 'cover' ? 'is-cover' : '',
-                          read ? 'is-read' : '',
-                          held !== null ? 'is-held' : '',
-                        ]
-                          .filter(Boolean)
-                          .join(' ')}
-                        aria-label={page.label}
-                        aria-hidden={index !== pageIndex}
-                        style={{
-                          zIndex: pages.length - index,
-                          transform:
-                            held !== null
-                              ? `rotateY(${held}deg)`
-                              : read
-                                ? undefined
-                                : `translateX(${depth * 2}px)`,
-                          opacity: held !== null ? 1 : undefined,
-                        }}
-                      >
-                        {page.id !== 'cover' && (
-                          <p className="page-eyebrow">Track {String(index).padStart(2, '0')}</p>
-                        )}
-                        {page.content}
-                      </section>
-                    )
-                  })}
-                </div>
-                <nav className="booklet-nav" aria-label="Booklet pages">
-                  <button
-                    type="button"
-                    className="booklet-turn is-prev"
-                    aria-label="Previous page"
-                    disabled={pageIndex === 0}
-                    onClick={() => turnTo(pageIndex - 1)}
-                  >
-                    <ChevronLeft size={16} aria-hidden="true" />
-                  </button>
-                  <span className="booklet-folio">
-                    {String(pageIndex).padStart(2, '0')} / {String(lastIndex).padStart(2, '0')}
-                  </span>
-                  <button
-                    type="button"
-                    className="booklet-turn is-next"
-                    aria-label="Next page"
-                    disabled={pageIndex === lastIndex}
-                    onClick={() => turnTo(pageIndex + 1)}
-                  >
-                    <ChevronRight size={16} aria-hidden="true" />
-                  </button>
-                </nav>
-              </div>
-            </div>
+            {/* The front cover: art on one face, its paper back on the other.
+                Opening swings it over the hinge into the lid. */}
+            <button
+              type="button"
+              className="case-cover"
+              aria-label="Open the case"
+              disabled={opened}
+              tabIndex={opened ? -1 : 0}
+              onClick={() => setOpened(true)}
+            >
+              <span className="cover-front">
+                <CoverArt doc={doc} />
+                <span className="case-gloss" aria-hidden="true" />
+              </span>
+              <span className="cover-back" aria-hidden="true" />
+            </button>
           </div>
-        </OpenCase>
-      )}
+        </div>
+        <div className="booklet" aria-roledescription="carousel" aria-hidden={!opened}>
+          <div
+            className="booklet-window"
+            onPointerDown={handlePointerDown}
+            onPointerMove={handlePointerMove}
+            onPointerUp={handlePointerEnd}
+            onPointerCancel={handlePointerEnd}
+            onPointerLeave={handlePointerEnd}
+            onClickCapture={handleClickCapture}
+          >
+            {/* A stapled booklet: every page is a sheet in a stack, and a
+                turn lifts the top sheet over its binding. Read sheets sit
+                flipped at the spine; a class change is the whole turn, so
+                nothing waits on an animation callback. */}
+            <div className="booklet-sheets">
+              {pages.map((page, index) => {
+                const held = sheetRotation(index)
+                const read = index < pageIndex
+                const depth = Math.max(0, Math.min(index - pageIndex, 3))
+                return (
+                  <section
+                    key={page.id}
+                    className={[
+                      'sheet',
+                      page.id === 'cover' ? 'is-cover' : '',
+                      read ? 'is-read' : '',
+                      held !== null ? 'is-held' : '',
+                    ]
+                      .filter(Boolean)
+                      .join(' ')}
+                    aria-label={page.label}
+                    aria-hidden={index !== pageIndex}
+                    style={{
+                      zIndex: pages.length - index,
+                      transform:
+                        held !== null
+                          ? `rotateY(${held}deg)`
+                          : read
+                            ? undefined
+                            : `translateX(${depth * 2}px)`,
+                      opacity: held !== null ? 1 : undefined,
+                    }}
+                  >
+                    {page.id !== 'cover' && (
+                      <p className="page-eyebrow">Track {String(index).padStart(2, '0')}</p>
+                    )}
+                    {page.content}
+                  </section>
+                )
+              })}
+            </div>
+            <nav className="booklet-nav" aria-label="Booklet pages">
+              <button
+                type="button"
+                className="booklet-turn is-prev"
+                aria-label="Previous page"
+                disabled={pageIndex === 0}
+                onClick={() => turnTo(pageIndex - 1)}
+              >
+                <ChevronLeft size={16} aria-hidden="true" />
+              </button>
+              <span className="booklet-folio">
+                {String(pageIndex).padStart(2, '0')} / {String(lastIndex).padStart(2, '0')}
+              </span>
+              <button
+                type="button"
+                className="booklet-turn is-next"
+                aria-label="Next page"
+                disabled={pageIndex === lastIndex}
+                onClick={() => turnTo(pageIndex + 1)}
+              >
+                <ChevronRight size={16} aria-hidden="true" />
+              </button>
+            </nav>
+          </div>
+        </div>
+      </OpenCase>
+      <p className={opened ? 'case-hint is-open' : 'case-hint'}>Press to open</p>
       <Footer>
         Made with Mixtape. <a href={import.meta.env.BASE_URL}>Make one for your own wedding</a>
       </Footer>
