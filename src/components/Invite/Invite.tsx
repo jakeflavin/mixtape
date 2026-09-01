@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useReducedMotion } from 'motion/react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { shareUrl } from '@/lib/codec'
 import { useGenreTheme } from '@/hooks/useGenreTheme'
 import { CoverArt } from './CoverArt'
 import { Disc } from './Disc'
@@ -47,8 +46,6 @@ export function Invite({ doc }: InviteProps) {
 
   useGenreTheme(doc.theme, document.documentElement)
 
-  const url = useMemo(() => shareUrl(doc), [doc])
-
   const pages = useMemo<[Page, ...Page[]]>(() => {
     const list: Page[] = [
       // A booklet starts at its cover — the album art again, printed on paper —
@@ -59,11 +56,11 @@ export function Invite({ doc }: InviteProps) {
     if (doc.travel.length > 0)
       list.push({ id: 'travel', label: 'Getting there', content: <TravelPage doc={doc} /> })
     if (doc.faqs.length > 0)
-      list.push({ id: 'faq', label: 'Good questions', content: <FaqPage doc={doc} url={url} /> })
+      list.push({ id: 'faq', label: 'Good questions', content: <FaqPage doc={doc} /> })
     if (doc.playlist)
       list.push({ id: 'play', label: 'Press play', content: <PlayPage doc={doc} /> })
     return list as [Page, ...Page[]]
-  }, [doc, url])
+  }, [doc])
 
   const lastIndex = pages.length - 1
   const turnTo = (index: number) => setPageIndex(Math.max(0, Math.min(index, lastIndex)))
@@ -202,6 +199,8 @@ export function Invite({ doc }: InviteProps) {
                     className={[
                       'sheet',
                       page.id === 'cover' ? 'is-cover' : '',
+                      // The date and play pages set like a title spread.
+                      page.id === 'date' || page.id === 'play' ? 'is-hero' : '',
                       read ? 'is-read' : '',
                       held !== null ? 'is-held' : '',
                     ]

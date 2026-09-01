@@ -1,4 +1,4 @@
-import styled, { keyframes } from 'styled-components'
+import styled from 'styled-components'
 import { motion } from 'motion/react'
 
 export const Scene = styled.main`
@@ -357,6 +357,22 @@ export const OpenCase = styled(motion.article)`
     container-type: inline-size;
   }
 
+  .sheet.is-hero {
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 16px;
+  }
+
+  .sheet.is-hero .page-eyebrow::after {
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .sheet.is-hero .page-flourish {
+    margin: 2px auto;
+  }
+
   .sheet.is-read {
     transform: rotateY(-88deg);
     opacity: 0;
@@ -390,11 +406,23 @@ export const OpenCase = styled(motion.article)`
   }
 
   .page-eyebrow {
+    position: relative;
     font-size: var(--font-tiny);
     letter-spacing: 0.3em;
     text-transform: uppercase;
     color: var(--accent);
     font-weight: 600;
+    padding-bottom: 10px;
+  }
+
+  .page-eyebrow::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 34px;
+    height: 2px;
+    background: var(--accent);
   }
 
   .page-title {
@@ -405,8 +433,32 @@ export const OpenCase = styled(motion.article)`
     line-height: 1.15;
   }
 
-  .page-lead {
-    font-size: clamp(16px, 2vw, 19px);
+  .page-caps {
+    font-size: var(--font-small);
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+  }
+
+  .page-caps.is-dim {
+    color: var(--dim);
+  }
+
+  .page-note {
+    font-family: var(--font-display);
+    letter-spacing: var(--display-tracking);
+    font-style: italic;
+    font-size: clamp(15px, 1.8vw, 18px);
+    color: var(--dim);
+    max-width: 34ch;
+    line-height: 1.6;
+  }
+
+  .page-flourish {
+    display: block;
+    width: 44px;
+    height: 2px;
+    background: var(--accent);
+    margin: 2px 0;
   }
 
   .page-body {
@@ -414,32 +466,24 @@ export const OpenCase = styled(motion.article)`
     max-width: 44ch;
   }
 
-  .page-dim {
-    color: var(--dim);
-    font-size: var(--font-small);
-    max-width: 44ch;
-  }
-
-  .page-pill {
-    border: 1px solid var(--line);
-    background: var(--surface-hi);
-    border-radius: var(--radius-pill);
-    padding: 6px 14px;
-    font-size: var(--font-small);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-
   .page-list {
     display: flex;
     flex-direction: column;
-    gap: 13px;
+    gap: 14px;
+    align-self: stretch;
+  }
+
+  .page-list li + li {
+    border-top: 1px solid var(--line);
+    padding-top: 14px;
   }
 
   .page-item-title {
-    font-size: var(--font-body);
+    font-size: var(--font-small);
     font-weight: 700;
-    margin-bottom: 2px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 3px;
   }
 
   .page-list .page-body {
@@ -490,38 +534,6 @@ export const OpenCase = styled(motion.article)`
   .page-play:hover {
     background: var(--accent-hi);
     transform: translateY(-1px);
-  }
-
-  .page-eq {
-    display: flex;
-    align-items: flex-end;
-    gap: 5px;
-    height: 26px;
-    margin-top: 4px;
-  }
-
-  .page-eq i {
-    width: 5px;
-    border-radius: 3px;
-    background: var(--accent);
-    animation: ${keyframes`
-      from { height: 20%; }
-      to { height: 100%; }
-    `}
-      0.6s ease-in-out infinite alternate;
-  }
-
-  .page-eq i:nth-child(2) {
-    animation-delay: 0.15s;
-  }
-  .page-eq i:nth-child(3) {
-    animation-delay: 0.3s;
-  }
-  .page-eq i:nth-child(4) {
-    animation-delay: 0.45s;
-  }
-  .page-eq i:nth-child(5) {
-    animation-delay: 0.6s;
   }
 
   /* The turn chip: a folio between two chevrons, printed low on whatever

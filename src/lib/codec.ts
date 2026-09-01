@@ -69,10 +69,12 @@ export function sanitize(value: unknown): SaveTheDate {
     time: cleanString(record.time, 5),
     venue: cleanString(record.venue, 200),
     city: cleanString(record.city, 200),
+    dateNote: cleanString(record.dateNote, 300),
     travel: cleanTravel(record.travel),
     faqs: cleanFaqs(record.faqs),
     playlist: cleanString(record.playlist, 500),
     note: cleanString(record.note, 500),
+    website: cleanString(record.website, 500),
     album: cleanString(record.album, 120),
     theme: cleanTheme(record.theme),
   }

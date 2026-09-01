@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { coverYear, daysUntil, formatLongDate, formatTime, parseDate } from './format'
+import { coverYear, formatLongDate, formatTime, parseDate } from './format'
 
 describe('parseDate', () => {
   it('parses as a local date, not UTC', () => {
@@ -45,21 +45,6 @@ describe('formatTime', () => {
     expect(formatTime('25:00')).toBe('')
     expect(formatTime('12:75')).toBe('')
     expect(formatTime('')).toBe('')
-  })
-})
-
-describe('daysUntil', () => {
-  it('counts whole days regardless of the hour', () => {
-    expect(daysUntil('2027-06-12', new Date(2027, 5, 10, 23, 59))).toBe(2)
-    expect(daysUntil('2027-06-12', new Date(2027, 5, 12, 0, 1))).toBe(0)
-  })
-
-  it('goes negative after the day', () => {
-    expect(daysUntil('2027-06-12', new Date(2027, 5, 14))).toBe(-2)
-  })
-
-  it('is null when no date is set', () => {
-    expect(daysUntil('', new Date())).toBeNull()
   })
 })
 

@@ -127,6 +127,16 @@ export function Builder({ initial }: BuilderProps) {
                   onChange={(e) => update({ city: e.target.value })}
                 />
               </Field>
+              <Field className="is-wide">
+                <label htmlFor="date-note">A line in your own words</label>
+                <input
+                  id="date-note"
+                  type="text"
+                  placeholder="Dinner and dancing to follow."
+                  value={doc.dateNote}
+                  onChange={(e) => update({ dateNote: e.target.value })}
+                />
+              </Field>
             </div>
           </Section>
           <Section>
@@ -150,7 +160,7 @@ export function Builder({ initial }: BuilderProps) {
           <Section>
             <h2>Questions</h2>
             <p className="section-hint">
-              The ones people will ask anyway. The page also carries a QR code of the invite.
+              The ones people will ask anyway. Leave it empty to drop the page.
             </p>
             <ItemsEditor
               label="Question"
@@ -162,6 +172,21 @@ export function Builder({ initial }: BuilderProps) {
                 update({ faqs: items.map((i) => ({ id: i.id, q: i.title, a: i.body })) })
               }
             />
+            <div className="section-grid">
+              <Field className="is-wide">
+                <label htmlFor="website">Wedding website</label>
+                <input
+                  id="website"
+                  type="url"
+                  placeholder="https://…"
+                  value={doc.website}
+                  onChange={(e) => update({ website: e.target.value })}
+                />
+                <p className="field-hint">
+                  Printed on this page as a QR code. Leave it empty and no code appears.
+                </p>
+              </Field>
+            </div>
           </Section>
           <Section>
             <h2>The playlist</h2>

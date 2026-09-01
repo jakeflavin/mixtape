@@ -37,12 +37,16 @@ export interface SaveTheDate {
   time: string
   venue: string
   city: string
+  /** A line in the couple's own words under the date — nothing is generated. */
+  dateNote: string
   travel: TravelItem[]
   faqs: FaqItem[]
   /** A link to the playlist, usually Spotify. Empty hides the press-play track. */
   playlist: string
   /** A line under the play button — why this playlist, or what to add to it. */
   note: string
+  /** The wedding website. Shown as a QR code on the questions page when set. */
+  website: string
   /** The album title printed on the cover. */
   album: string
   theme: ThemeId

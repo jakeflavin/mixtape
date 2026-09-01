@@ -59,14 +59,6 @@ export function formatTime(time: string): string {
   return clock.format(new Date(2000, 0, 1, h, m))
 }
 
-/** Whole days from `now` until the date, negative once it has passed. */
-export function daysUntil(iso: string, now: Date): number | null {
-  const date = parseDate(iso)
-  if (!date) return null
-  const start = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-  return Math.round((date.getTime() - start.getTime()) / 86_400_000)
-}
-
 /** The year alone, for the album cover's small print. */
 export function coverYear(iso: string): string {
   const date = parseDate(iso)

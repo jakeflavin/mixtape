@@ -13,6 +13,7 @@ export function starterDoc(): SaveTheDate {
     time: '16:30',
     venue: 'The Bell Foundry',
     city: 'Hudson, New York',
+    dateNote: 'Dinner and dancing to follow.',
     travel: [
       {
         id: 'travel-fly',
@@ -39,6 +40,7 @@ export function starterDoc(): SaveTheDate {
     ],
     playlist: 'https://open.spotify.com/playlist/37i9dQZF1DX7gIoKXt0gmx',
     note: 'Every song on it is one of ours. Add the song you want to dance to.',
+    website: '',
     album: 'Save the date',
     theme: 'indie',
   }

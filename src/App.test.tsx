@@ -64,6 +64,10 @@ describe('invite', () => {
     // the chevron flips one sheet at a time.
     await user.click(screen.getByRole('button', { name: /next page/i }))
     expect(await screen.findByRole('heading', { name: /saturday|june/i })).toBeInTheDocument()
+    // The couple's own line prints; nothing is generated around it.
+    expect(screen.getByText('Dinner and dancing to follow.')).toBeInTheDocument()
+    expect(screen.queryByText(/formal invitation/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/days away/i)).not.toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: /next page/i }))
     expect(
@@ -84,6 +88,34 @@ describe('invite', () => {
     // The folio walks back too.
     await user.click(screen.getByRole('button', { name: /previous page/i }))
     expect(screen.getByText('03 / 04')).toBeInTheDocument()
+  })
+
+  it('prints a QR code only for a provided wedding website', async () => {
+    const user = userEvent.setup()
+    const withSite = { ...starterDoc(), website: 'https://juneandtheo.example' }
+    visit(shareUrl(withSite, 'https://example.test'))
+    render(<App />)
+    await user.click(screen.getByRole('button', { name: /open the case/i }))
+    await user.click(screen.getByRole('button', { name: /next page/i }))
+    await user.click(screen.getByRole('button', { name: /next page/i }))
+    await user.click(screen.getByRole('button', { name: /next page/i }))
+    expect(
+      await screen.findByRole('img', { name: /qr code opening https:\/\/juneandtheo\.example/i }),
+    ).toBeInTheDocument()
+  })
+
+  it('prints no QR code when there is no website', async () => {
+    const user = userEvent.setup()
+    visit(shareUrl(starterDoc(), 'https://example.test'))
+    render(<App />)
+    await user.click(screen.getByRole('button', { name: /open the case/i }))
+    await user.click(screen.getByRole('button', { name: /next page/i }))
+    await user.click(screen.getByRole('button', { name: /next page/i }))
+    await user.click(screen.getByRole('button', { name: /next page/i }))
+    expect(
+      await screen.findByRole('heading', { name: 'Good questions', level: 2 }),
+    ).toBeInTheDocument()
+    expect(screen.queryByRole('img', { name: /qr code/i })).not.toBeInTheDocument()
   })
 
   it('drops the travel and questions pages when those lists are empty', async () => {

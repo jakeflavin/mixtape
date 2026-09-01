@@ -119,6 +119,11 @@ export const Field = styled.div`
   input::placeholder {
     color: var(--dim);
   }
+
+  .field-hint {
+    color: var(--dim);
+    font-size: var(--font-tiny);
+  }
 `
 
 export const Preview = styled.aside`

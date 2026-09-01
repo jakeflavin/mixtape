@@ -19,8 +19,9 @@ or truncated `m` falls back to the builder rather than a broken invite.
 
 ## The document
 
-`lib/types.ts` is the whole schema: names, date, time, venue, city, travel notes, FAQs,
-playlist link, a note, an album title, a theme. `lib/codec.ts` compresses it (lz-string →
+`lib/types.ts` is the whole schema: names, date, time, venue, city, a line for the date
+page, travel notes, FAQs, playlist link, a note, a wedding website, an album title, a
+theme. `lib/codec.ts` compresses it (lz-string →
 URL-safe blob) and treats everything read back as hostile — unknown fields dropped, sizes
 clamped, malformed list entries discarded, unknown themes mapped to the default. Every
 list entry carries an id so builder edits have stable keys.
@@ -52,9 +53,16 @@ without decompressing anything.
   ("02 / 04") between two chevrons serves anyone who would rather press, and the
   left/right arrow keys turn pages too. A release at the end of a flip never also
   "clicks" what the finger was over.
-- Pages: The date, Getting there, Good questions (with the QR), Press play. Pages with
-  nothing in them disappear; the date always shows, and the record is always in the tray.
-- The FAQ page carries a QR code of the invite's own URL, so a guest can hand it on.
+- Pages: The date, Getting there, Good questions, Press play. Pages with nothing in
+  them disappear; the date always shows, and the record is always in the tray.
+- **Nothing a guest reads is generated.** Every line was typed by the couple, and an
+  empty field simply does not print — there is no days-away counter and no boilerplate.
+  The date and play pages set centred like a title spread, with the couple's own line
+  (`dateNote`, `note`) printed in italics; travel notes and questions set as printed
+  credits with hairlines between entries.
+- The questions page prints a QR code of the couple's wedding website (`website`),
+  when one is provided. No website, no code. (The guest-link QR for printing lives in
+  the builder's share panel, not the invite.)
 - The footer links back to the builder ("Make one for your own wedding").
 - Reduced motion collapses every entrance to a plain appearance and parks the disc.
 
@@ -80,5 +88,4 @@ without decompressing anything.
 
 Dates and times go through `Intl` with no locale passed. Date strings are parsed by hand
 (`2027-06-12` as a _local_ date — `new Date(string)` would shift it a day west of
-Greenwich) and impossible dates are rejected rather than rolled over. The days-away pill
-counts whole days and hides once the date has passed.
+Greenwich) and impossible dates are rejected rather than rolled over.
