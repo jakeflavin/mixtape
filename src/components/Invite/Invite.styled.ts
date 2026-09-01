@@ -3,6 +3,9 @@ import { motion } from 'motion/react'
 
 export const Scene = styled.main`
   min-height: 100dvh;
+  /* The open case's far half is allowed to run off screen on phones; clipping
+   * here keeps that from becoming a horizontal scrollbar. */
+  overflow-x: clip;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -333,7 +336,7 @@ export const OpenCase = styled(motion.article)`
     gap: 13px;
     padding: clamp(20px, 3.4vw, 34px);
     padding-left: clamp(28px, 3.8vw, 42px); /* the binding gutter */
-    padding-bottom: 58px; /* room for the printed turn chip */
+    padding-bottom: 66px; /* room for the printed turn chip */
     overflow-y: auto;
     background: var(--surface);
     border-radius: 3px 10px 10px 3px;
@@ -583,29 +586,53 @@ export const OpenCase = styled(motion.article)`
     }
   }
 
-  /* A phone holds the case upright — lid above the hinge, tray below — and
-   * the booklet lies across the middle, still its own object. */
+  /* A phone opens the case exactly the way desktop does — the cover swings
+   * left over the hinge — but zoomed in on the tray half: the shell is two
+   * phone-widths wide, held so the tray fills the screen, and the lid swings
+   * out past the left edge and is simply cut off. The booklet stays square,
+   * the shape of the thing that actually comes out of a jewel case. */
   @media (max-width: 899px) {
-    width: min(94vw, 430px);
+    width: calc(172vw + 34px);
 
     .case-shell {
-      grid-template-areas: 'lid' 'hinge' 'tray';
-      grid-template-columns: 1fr;
-      grid-template-rows: 1fr 14px 1fr;
+      grid-template-columns: 86vw 14px 86vw;
       padding: 10px;
     }
 
     .panel {
       min-height: 0;
-      aspect-ratio: 1 / 1.1;
+      aspect-ratio: 1 / 1.06;
+    }
+
+    /* Centres the tray half in the viewport — and stays put when the case
+     * opens, so the lid unfolds off screen instead of pulling the disc away. */
+    .case-clip,
+    &.is-open .case-clip {
+      transform: translateX(-25%);
+    }
+
+    /* Shut, show the spine and nothing of the lid behind it. */
+    .case-clip {
+      clip-path: inset(0 0 0 calc(50% - 16px) round 14px);
+    }
+
+    &.is-open .case-clip {
+      clip-path: inset(0 0 0 0 round 14px);
+    }
+
+    .case-cover {
+      top: 10px;
+      bottom: 10px;
+      right: 10px;
+      left: calc(50% + 7px);
     }
 
     .tray {
-      padding: 10%;
+      padding: 8%;
     }
 
     .tray-recess {
-      width: min(100%, 300px);
+      width: min(100%, 320px);
     }
 
     .lid-tab {
@@ -613,44 +640,18 @@ export const OpenCase = styled(motion.article)`
     }
 
     .booklet {
-      /* Across the lid and hinge, ending partway down the tray so the disc
-       * still shows beneath it. */
-      top: 4%;
-      bottom: 33%;
-      left: 5%;
-      width: 90%;
+      /* Square, riding a little high on the case so the disc's lower arc
+       * stays in view beneath it. */
+      top: -3%;
+      bottom: auto;
+      left: 50%;
+      width: 78vw;
+      aspect-ratio: 1 / 1.04;
+      transform: translateX(-50%) rotate(-1deg) translateY(-18px) scale(1.05);
     }
 
     &.is-open .booklet {
-      transform: rotate(-2.4deg);
-    }
-
-    /* Shut, a phone case is folded upward: the tray half shows, the hinge
-     * along its top edge as the spine. */
-    .case-clip {
-      clip-path: inset(calc(50% - 20px) 0 0 0 round 14px);
-      transform: translateY(-24%);
-    }
-
-    &.is-open .case-clip {
-      clip-path: inset(0 0 0 0 round 14px);
-      transform: none;
-    }
-
-    .case-cover {
-      top: calc(50% + 7px);
-      bottom: 10px;
-      left: 10px;
-      right: 10px;
-      transform-origin: center top;
-    }
-
-    &.is-open .case-cover {
-      transform: rotateX(180deg);
-    }
-
-    .cover-back {
-      transform: rotateX(180deg);
+      transform: translateX(-50%) rotate(-2.4deg);
     }
   }
 `

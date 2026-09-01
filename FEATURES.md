@@ -39,9 +39,11 @@ without decompressing anything.
 - **Open**: the case is only a case — an empty lid with the recess and tabs the booklet
   came out of, the hinge, and the disc spinning in its moulded tray. The booklet is a
   separate paper object resting on the open case, slightly off centre and a few degrees
-  askew. Desktop lays the case flat (lid | hinge | tray); under 900px the case is folded
-  upward when shut and unfolds to stand upright (lid above, tray below), the booklet
-  lying across the middle with the disc peeking out beneath it.
+  askew. Desktop lays the case flat (lid | hinge | tray); under 900px the same flat case
+  is simply zoomed in on the tray half — the spine sits at the left edge, opening swings
+  the cover left exactly as on desktop, and the lid unfolds off screen and is cut off.
+  The booklet stays square, the shape of the thing that comes out of a jewel case, with
+  the disc's lower arc showing beneath it.
 - **The booklet opens like a booklet.** Its first sheet is the cover — the album art
   printed on paper — so the first flip is opening the booklet itself; the folio counts
   it as page 00. Pages are a stack of stapled sheets over a back cover; a drag lifts
