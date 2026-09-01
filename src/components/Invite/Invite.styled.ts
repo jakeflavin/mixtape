@@ -336,7 +336,6 @@ export const OpenCase = styled(motion.article)`
     gap: 13px;
     padding: clamp(20px, 3.4vw, 34px);
     padding-left: clamp(28px, 3.8vw, 42px); /* the binding gutter */
-    padding-bottom: 66px; /* room for the printed turn chip */
     overflow-y: auto;
     background: var(--surface);
     border-radius: 3px 10px 10px 3px;
@@ -355,22 +354,6 @@ export const OpenCase = styled(motion.article)`
     padding: 0;
     overflow: hidden;
     container-type: inline-size;
-  }
-
-  .sheet.is-hero {
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    gap: 16px;
-  }
-
-  .sheet.is-hero .page-eyebrow::after {
-    left: 50%;
-    transform: translateX(-50%);
-  }
-
-  .sheet.is-hero .page-flourish {
-    margin: 2px auto;
   }
 
   .sheet.is-read {
@@ -536,22 +519,27 @@ export const OpenCase = styled(motion.article)`
     transform: translateY(-1px);
   }
 
-  /* The turn chip: a folio between two chevrons, printed low on whatever
-   * sheet is up — a translucent paper chip so it reads on the cover too. */
+  /* The page turns: a folio between two chevrons, set on the ground under
+   * the album case so they never cover what the booklet says. They arrive
+   * with the booklet. */
 
   .booklet-nav {
-    position: absolute;
-    left: 50%;
-    bottom: 12px;
-    transform: translateX(-50%);
-    z-index: 60;
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 3px 8px;
-    border-radius: var(--radius-pill);
-    border: 1px solid var(--line);
-    background: color-mix(in srgb, var(--surface) 85%, transparent);
+    justify-content: center;
+    gap: 10px;
+    margin-top: 14px;
+    visibility: hidden;
+    opacity: 0;
+    transition:
+      opacity 0.45s ease,
+      visibility 0s;
+  }
+
+  &.is-open .booklet-nav {
+    visibility: visible;
+    opacity: 1;
+    transition-delay: 0.7s;
   }
 
   .booklet-folio {
@@ -593,8 +581,13 @@ export const OpenCase = styled(motion.article)`
       transition: none;
     }
 
-    &.is-open .booklet {
+    &.is-open .booklet,
+    &.is-open .booklet-nav {
       transition-delay: 0s;
+    }
+
+    .booklet-nav {
+      transition: none;
     }
   }
 

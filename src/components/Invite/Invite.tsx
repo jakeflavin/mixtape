@@ -199,8 +199,6 @@ export function Invite({ doc }: InviteProps) {
                     className={[
                       'sheet',
                       page.id === 'cover' ? 'is-cover' : '',
-                      // The date and play pages set like a title spread.
-                      page.id === 'date' || page.id === 'play' ? 'is-hero' : '',
                       read ? 'is-read' : '',
                       held !== null ? 'is-held' : '',
                     ]
@@ -227,31 +225,31 @@ export function Invite({ doc }: InviteProps) {
                 )
               })}
             </div>
-            <nav className="booklet-nav" aria-label="Booklet pages">
-              <button
-                type="button"
-                className="booklet-turn is-prev"
-                aria-label="Previous page"
-                disabled={pageIndex === 0}
-                onClick={() => turnTo(pageIndex - 1)}
-              >
-                <ChevronLeft size={16} aria-hidden="true" />
-              </button>
-              <span className="booklet-folio">
-                {String(pageIndex).padStart(2, '0')} / {String(lastIndex).padStart(2, '0')}
-              </span>
-              <button
-                type="button"
-                className="booklet-turn is-next"
-                aria-label="Next page"
-                disabled={pageIndex === lastIndex}
-                onClick={() => turnTo(pageIndex + 1)}
-              >
-                <ChevronRight size={16} aria-hidden="true" />
-              </button>
-            </nav>
           </div>
         </div>
+        <nav className="booklet-nav" aria-label="Booklet pages" aria-hidden={!opened}>
+          <button
+            type="button"
+            className="booklet-turn is-prev"
+            aria-label="Previous page"
+            disabled={pageIndex === 0}
+            onClick={() => turnTo(pageIndex - 1)}
+          >
+            <ChevronLeft size={16} aria-hidden="true" />
+          </button>
+          <span className="booklet-folio">
+            {String(pageIndex).padStart(2, '0')} / {String(lastIndex).padStart(2, '0')}
+          </span>
+          <button
+            type="button"
+            className="booklet-turn is-next"
+            aria-label="Next page"
+            disabled={pageIndex === lastIndex}
+            onClick={() => turnTo(pageIndex + 1)}
+          >
+            <ChevronRight size={16} aria-hidden="true" />
+          </button>
+        </nav>
       </OpenCase>
       <p className={opened ? 'case-hint is-open' : 'case-hint'}>Press to open</p>
       <Footer>

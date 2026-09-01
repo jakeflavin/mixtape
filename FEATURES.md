@@ -57,8 +57,9 @@ without decompressing anything.
   them disappear; the date always shows, and the record is always in the tray.
 - **Nothing a guest reads is generated.** Every line was typed by the couple, and an
   empty field simply does not print — there is no days-away counter and no boilerplate.
-  The date and play pages set centred like a title spread, with the couple's own line
-  (`dateNote`, `note`) printed in italics; travel notes and questions set as printed
+  Every page shares one grid — the track eyebrow, the title and the content sit in the
+  same place on every sheet, all set left like printed liner notes. The couple's own
+  lines (`dateNote`, `note`) print in italics; travel notes and questions set as
   credits with hairlines between entries.
 - The questions page prints a QR code of the couple's wedding website (`website`),
   when one is provided. No website, no code. (The guest-link QR for printing lives in

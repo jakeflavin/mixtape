@@ -86,7 +86,9 @@ global reset also floors CSS animation durations), and the disc is rendered park
   transition starts from the current computed value. The gesture itself is raw pointer
   events; motion's drag never engaged against an animated transform target.
 - The booklet page is left-aligned prose with an eyebrow ("Track 03"), a display-face
-  title, and body copy capped at 44ch.
+  title, and body copy capped at 44ch. Every sheet uses the same grid — eyebrow, title,
+  content, always in the same place — and nothing centres: centring is reserved for
+  objects (the case, the disc, the turn controls), never for text.
 
 ## Copy
 
