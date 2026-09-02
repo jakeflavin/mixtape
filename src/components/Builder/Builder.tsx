@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { RotateCcw } from 'lucide-react'
+import { ExternalLink, RotateCcw, Unlink } from 'lucide-react'
 import { useDraft } from '@/hooks/useDraft'
 import { useGenreTheme } from '@/hooks/useGenreTheme'
 import { useSystemTheme } from '@/hooks/useSystemTheme'
@@ -8,16 +8,19 @@ import { ArtworkPicker } from './ArtworkPicker'
 import { ItemsEditor } from './ItemsEditor'
 import { ThemePicker } from './ThemePicker'
 import { SharePanel } from './SharePanel'
-import { Page, Header, Layout, Form, Section, Field, Preview } from './Builder.styled'
+import { shareUrl } from '@/lib/codec'
+import { Page, Header, Notice, Layout, Form, Section, Field, Preview } from './Builder.styled'
 import type { EditorItem } from './ItemsEditor'
 import type { SaveTheDate } from '@/lib/types'
 
 export interface BuilderProps {
   /** A document reopened from an edit link, or null for a fresh one. */
   initial: SaveTheDate | null
+  /** A link carried a document that would not decode. Say so; do not pretend. */
+  brokenLink?: boolean
 }
 
-export function Builder({ initial }: BuilderProps) {
+export function Builder({ initial, brokenLink = false }: BuilderProps) {
   const { doc, update, reset } = useDraft(initial)
   const [previewEl, setPreviewEl] = useState<HTMLElement | null>(null)
 
@@ -54,6 +57,15 @@ export function Builder({ initial }: BuilderProps) {
           <span>Start over</span>
         </button>
       </Header>
+      {brokenLink && (
+        <Notice role="status">
+          <Unlink size={16} aria-hidden="true" />
+          <span>
+            That link did not survive the trip — it was cut short somewhere between the couple and
+            you. Ask them to send it again. Below is a blank one of your own.
+          </span>
+        </Notice>
+      )}
       <Layout>
         <Form onSubmit={(event) => event.preventDefault()}>
           <Section>
@@ -247,6 +259,16 @@ export function Builder({ initial }: BuilderProps) {
             </span>
           </div>
           <p className="preview-note">The cover, as guests first see it.</p>
+          <a
+            className="preview-open"
+            href={shareUrl(doc)}
+            target="_blank"
+            rel="noreferrer"
+            title="Opens the invite exactly as a guest gets it"
+          >
+            <ExternalLink size={15} aria-hidden="true" />
+            <span>Open the whole invite</span>
+          </a>
         </Preview>
       </Layout>
     </Page>

@@ -136,6 +136,13 @@ export function editUrl(doc: SaveTheDate, origin = window.location.origin): stri
 export interface RouteState {
   doc: SaveTheDate | null
   editing: boolean
+  /**
+   * A link carried a document and it would not decode — a paste that lost its
+   * tail, a line-wrapped email. The builder is still the right place to land,
+   * but the guest who got there needs telling, so this is not the same state
+   * as arriving with no link at all.
+   */
+  failed: boolean
 }
 
 /** Fragment first; the query string still reads for links shared before the move. */
@@ -143,8 +150,10 @@ export function readRoute(search: string, hash = ''): RouteState {
   const query = new URLSearchParams(search)
   const fragment = new URLSearchParams(hash.startsWith('#') ? hash.slice(1) : hash)
   const blob = fragment.get('m') ?? query.get('m')
+  const doc = blob ? decode(blob) : null
   return {
-    doc: blob ? decode(blob) : null,
+    doc,
     editing: (fragment.get('edit') ?? query.get('edit')) === '1',
+    failed: Boolean(blob) && doc === null,
   }
 }

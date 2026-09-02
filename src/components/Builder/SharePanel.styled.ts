@@ -37,7 +37,8 @@ export const Panel = styled.section`
     background: var(--surface-hi);
     padding: 9px 12px;
     font-family: var(--font-mono);
-    font-size: var(--font-tiny);
+    /* 16px or iOS zooms in the moment the field is focused to copy from. */
+    font-size: max(16px, var(--font-tiny));
     color: var(--dim);
   }
 
@@ -45,6 +46,7 @@ export const Panel = styled.section`
     display: inline-flex;
     align-items: center;
     gap: 7px;
+    min-height: 44px;
     padding: 0 14px;
     border-radius: var(--radius);
     background: var(--accent);
@@ -63,6 +65,30 @@ export const Panel = styled.section`
     font-size: var(--font-small);
   }
 
+  .share-size {
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* The only warning the panel gives, because it is the only field a guest
+   * cannot do without. */
+  .share-warning {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    padding: 10px 12px;
+    border: 1px solid var(--danger);
+    border-radius: var(--radius);
+    background: color-mix(in srgb, var(--danger) 8%, var(--surface));
+    font-size: var(--font-small);
+
+    svg {
+      flex: none;
+      margin-top: 2px;
+      color: var(--danger);
+    }
+  }
+
   .share-foot {
     display: flex;
     align-items: center;
@@ -77,9 +103,12 @@ export const Panel = styled.section`
     gap: 10px;
   }
 
+  /* Big enough to actually scan. A guest link needs a version-26 code — 121
+   * modules — and at 84px each module was under 0.7px: a camera cannot read
+   * that, on screen or printed small. */
   .share-qr img {
-    width: 84px;
-    height: 84px;
+    width: 176px;
+    height: 176px;
     border-radius: 8px;
     /* Contrast for a camera, not a palette choice. */
     background: #ffffff;
@@ -90,13 +119,14 @@ export const Panel = styled.section`
   .share-qr figcaption {
     color: var(--dim);
     font-size: var(--font-tiny);
-    max-width: 16ch;
+    max-width: 20ch;
   }
 
   .share-open {
     display: inline-flex;
     align-items: center;
     gap: 8px;
+    min-height: 44px;
     font-weight: 600;
     color: var(--accent);
     text-decoration: none;

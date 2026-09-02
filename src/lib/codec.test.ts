@@ -112,11 +112,20 @@ describe('urls', () => {
     expect(route.editing).toBe(false)
   })
 
-  it('readRoute treats a corrupt blob as no document', () => {
-    expect(readRoute('', '#m=garbage')).toEqual({ doc: null, editing: false })
+  it('readRoute treats a corrupt blob as no document, and says the link failed', () => {
+    expect(readRoute('', '#m=garbage')).toEqual({ doc: null, editing: false, failed: true })
+  })
+
+  it('readRoute tells a truncated link apart from no link at all', () => {
+    const doc = starterDoc()
+    const url = new URL(shareUrl(doc, 'https://example.test'))
+    // What a message app does to a kilobyte of URL.
+    const cut = url.hash.slice(0, url.hash.length - 200)
+    expect(readRoute('', cut).failed).toBe(true)
+    expect(readRoute('', '').failed).toBe(false)
   })
 
   it('readRoute with no params is the builder', () => {
-    expect(readRoute('', '')).toEqual({ doc: null, editing: false })
+    expect(readRoute('', '')).toEqual({ doc: null, editing: false, failed: false })
   })
 })

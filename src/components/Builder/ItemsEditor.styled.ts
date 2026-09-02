@@ -26,6 +26,8 @@ export const Rows = styled.ul`
     background: var(--surface);
     padding: 9px 12px;
     resize: vertical;
+    /* 16px or iOS zooms the page in on focus — see Builder.styled. */
+    font-size: max(16px, var(--font-body));
   }
 
   input::placeholder,
@@ -36,8 +38,8 @@ export const Rows = styled.ul`
   .row-remove {
     display: grid;
     place-items: center;
-    width: 34px;
-    height: 38px;
+    width: 44px;
+    height: 44px;
     border-radius: var(--radius);
     color: var(--dim);
     transition:
@@ -54,6 +56,7 @@ export const Rows = styled.ul`
     display: inline-flex;
     align-items: center;
     gap: 8px;
+    min-height: 44px;
     color: var(--accent);
     font-weight: 600;
     padding: 6px 2px;

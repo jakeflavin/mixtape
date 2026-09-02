@@ -17,7 +17,7 @@ export function starterDoc(): SaveTheDate {
     travel: [
       {
         id: 'travel-fly',
-        heading: 'Getting there',
+        heading: 'By train',
         body: 'Fly into Albany, or take Amtrak from Penn Station to Hudson. The venue is ten minutes from the station.',
       },
       {

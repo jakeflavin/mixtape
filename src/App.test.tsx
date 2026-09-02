@@ -39,10 +39,19 @@ describe('routing', () => {
     expect(screen.getByLabelText('Venue')).toHaveValue('The Orpheum')
   })
 
-  it('falls back to the builder when the blob is corrupt', () => {
+  it('falls back to the builder when the blob is corrupt, and says why', () => {
     visit('https://example.test/mixtape/?t=jazz&m=corrupted')
     render(<App />)
     expect(screen.getByRole('heading', { name: 'Mixtape' })).toBeInTheDocument()
+    // A guest holding a link that lost its tail is owed an explanation, not a
+    // form that looks like it was always the plan.
+    expect(screen.getByRole('status')).toHaveTextContent(/did not survive the trip/i)
+  })
+
+  it('says nothing about broken links when there was no link', () => {
+    visit('https://example.test/mixtape/')
+    render(<App />)
+    expect(screen.queryByRole('status')).not.toBeInTheDocument()
   })
 })
 
@@ -164,5 +173,31 @@ describe('builder', () => {
     const link = screen.getByLabelText(/guest link/i) as HTMLInputElement
     const blob = new URLSearchParams(new URL(link.value).hash.slice(1)).get('m')
     expect(blob).toBeTruthy()
+  })
+})
+
+describe('share panel', () => {
+  it('warns when the invite has no date in it yet', async () => {
+    const user = userEvent.setup()
+    visit('https://example.test/mixtape/')
+    render(<App />)
+    expect(screen.queryByText(/no date in this one yet/i)).not.toBeInTheDocument()
+    const date = screen.getByLabelText('Date')
+    await user.clear(date)
+    expect(await screen.findByText(/no date in this one yet/i)).toBeInTheDocument()
+  })
+
+  it('says the link is too long for a code rather than dropping the code silently', async () => {
+    const user = userEvent.setup()
+    visit('https://example.test/mixtape/')
+    render(<App />)
+    // A photo pushes the link far past what any QR code can hold.
+    const note = screen.getByLabelText('A line to go with it')
+    await user.clear(note)
+    await user.type(note, 'x'.repeat(60))
+    const link = screen.getByLabelText(/guest link/i) as HTMLInputElement
+    expect(link.value.length).toBeLessThan(2300)
+    // The size of the link is on the page, in the terms a person shares it in.
+    expect(screen.getByText(new RegExp(`${link.value.length} characters`))).toBeInTheDocument()
   })
 })

@@ -29,6 +29,7 @@ export const Header = styled.header`
     display: inline-flex;
     align-items: center;
     gap: 7px;
+    min-height: 44px;
     padding: 8px 14px;
     border-radius: var(--radius-pill);
     border: 1px solid var(--line);
@@ -43,6 +44,31 @@ export const Header = styled.header`
   .header-reset:hover {
     color: var(--danger);
     border-color: var(--danger);
+  }
+`
+
+/*
+ * The one thing the builder ever has to say for itself: a link arrived
+ * carrying a document that would not decode. The guest holding that link is
+ * owed an explanation, not a form that looks like it was always the plan.
+ */
+export const Notice = styled.p`
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0;
+  padding: 12px 16px;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--accent) 8%, var(--surface));
+  color: var(--text);
+  font-size: var(--font-small);
+  max-width: 78ch;
+
+  svg {
+    flex: none;
+    margin-top: 2px;
+    color: var(--accent);
   }
 `
 
@@ -121,6 +147,9 @@ export const Field = styled.div`
     background: var(--surface);
     padding: 9px 12px;
     width: 100%;
+    /* Anything under 16px makes iOS Safari zoom the page in on focus and
+     * never zoom back out, once per field, the whole way down the form. */
+    font-size: max(16px, var(--font-body));
   }
 
   input::placeholder {
@@ -192,6 +221,31 @@ export const Preview = styled.aside`
   .preview-note {
     color: var(--dim);
     font-size: var(--font-small);
+  }
+
+  /* The preview can only ever be the cover; the booklet is a different shape
+   * and a different size. This is the way to read the rest of it. */
+  .preview-open {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 0 14px;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--line);
+    color: var(--text);
+    background: var(--surface);
+    font-size: var(--font-small);
+    font-weight: 600;
+    text-decoration: none;
+    transition:
+      border-color 0.2s ease,
+      color 0.2s ease;
+  }
+
+  .preview-open:hover {
+    border-color: var(--accent);
+    color: var(--accent);
   }
 
   @media (max-width: 999px) {
