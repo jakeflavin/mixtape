@@ -74,6 +74,7 @@ export function Invite({ doc }: InviteProps) {
    */
   const [overflowing, setOverflowing] = useState(false)
   const [expanded, setExpanded] = useState(false)
+  const truncated = opened && overflowing && current.id !== 'cover'
 
   const turnTo = (index: number) => {
     setExpanded(false)
@@ -208,7 +209,7 @@ export function Invite({ doc }: InviteProps) {
         </div>
         <div className="booklet" aria-roledescription="carousel" aria-hidden={!opened}>
           <div
-            className="booklet-window"
+            className={truncated ? 'booklet-window is-truncated' : 'booklet-window'}
             onPointerDown={handlePointerDown}
             onPointerMove={handlePointerMove}
             onPointerUp={handlePointerEnd}
@@ -258,7 +259,7 @@ export function Invite({ doc }: InviteProps) {
               })}
             </div>
           </div>
-          {opened && overflowing && current.id !== 'cover' && (
+          {truncated && (
             <button type="button" className="booklet-more" onClick={() => setExpanded(true)}>
               <Maximize2 size={13} aria-hidden="true" />
               <span>More</span>

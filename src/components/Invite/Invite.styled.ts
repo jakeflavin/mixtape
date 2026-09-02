@@ -303,6 +303,20 @@ export const OpenCase = styled(motion.article)`
     cursor: grabbing;
   }
 
+  /* The printed fade over a clipped sheet's last lines. */
+  .booklet-window.is-truncated::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 56px;
+    z-index: 50;
+    pointer-events: none;
+    border-radius: 0 0 10px 3px;
+    background: linear-gradient(180deg, transparent, var(--surface) 78%);
+  }
+
   /* The back cover, peeking out beneath the whole stack. */
   .booklet-window::before {
     content: '';
@@ -336,7 +350,9 @@ export const OpenCase = styled(motion.article)`
     gap: 13px;
     padding: clamp(20px, 3.4vw, 34px);
     padding-left: clamp(28px, 3.8vw, 42px); /* the binding gutter */
-    overflow-y: auto;
+    /* A sheet of paper does not scroll: what does not fit is clipped under
+     * the fade below, and the More chip opens the full page. */
+    overflow: hidden;
     background: var(--surface);
     border-radius: 3px 10px 10px 3px;
     box-shadow:

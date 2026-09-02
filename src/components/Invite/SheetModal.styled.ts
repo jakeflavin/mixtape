@@ -50,4 +50,20 @@ export const Dialog = styled.dialog`
     color: var(--text);
     background: var(--surface-hi);
   }
+
+  /* On a phone the sheet takes the whole screen. */
+  @media (max-width: 899px) {
+    width: 100vw;
+    max-width: 100vw;
+    height: 100dvh;
+    max-height: 100dvh;
+    margin: 0;
+    border-radius: 0;
+
+    .modal-sheet {
+      height: 100%;
+      max-height: 100dvh;
+      padding-top: clamp(28px, 8vw, 44px);
+    }
+  }
 `
