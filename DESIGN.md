@@ -30,7 +30,15 @@ the couple is working, not receiving.
 
 Every colour a component uses is a token (`--bg`, `--text`, `--dim`, `--line`,
 `--surface`, `--accent`, plus the cover/disc set). The hex literals in `themes.ts`,
-`index.css` and `index.html` are the token _sources_. The two deliberate exceptions are
+`index.css` and `index.html` are the token _sources_.
+
+**Every pairing that carries words clears WCAG AA in all ten palettes, and a test says
+so** (`themes.test.ts`). The pairs held are `--dim` on the sheet, on the ground and on a
+sunk panel; `--text` on the sheet; `--accent` as the track eyebrow on the sheet; and
+`--ink` on `--accent` and on `--accent-hi` for the play button. Six palettes were chosen
+by eye and landed in the 3.8–4.5 band, the default among them — pick a new colour with
+the test, not against the screen. Rock's `--ink` is dark for the same reason: its red
+cannot be both light enough to read on its own paper and dark enough to carry white type. The two deliberate exceptions are
 QR modules and their white card (contrast for a camera, commented as such) and the theme
 picker swatches (each paints a palette that is by definition not the active one).
 
@@ -93,10 +101,23 @@ global reset also floors CSS animation durations), and the disc is rendered park
   release mid-drag animates from wherever the finger left the sheet, because a
   transition starts from the current computed value. The gesture itself is raw pointer
   events; motion's drag never engaged against an animated transform target.
+- Under 900px the booklet rides high on the case and the record sits at the bottom of
+  its moulding, so an arc of the disc always shows; the case itself is capped so a tablet
+  gets a jewel case rather than a billboard. The page is set tighter there — smaller gaps,
+  less padding, and smaller body copy under 380px — because a sheet that clips a normal
+  invite is worse than one set a notch down.
 - The booklet page is left-aligned prose with an eyebrow ("Track 03"), a display-face
   title, and body copy capped at 44ch. Every sheet uses the same grid — eyebrow, title,
   content, always in the same place — and nothing centres: centring is reserved for
   objects (the case, the disc, the turn controls), never for text.
+
+## Paper
+
+Printing is a supported output, not an accident: a save-the-date is the most printable
+thing in the set. The print stylesheet drops the case, the chevrons and the credit, sets
+every page in ink one after another, and spells the playlist's address out after its
+button — a button is nothing on paper. Transitions are killed inside `@media print`, or
+the booklet prints caught mid-rotation.
 
 ## Copy
 
