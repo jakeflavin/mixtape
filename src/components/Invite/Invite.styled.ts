@@ -452,14 +452,6 @@ export const OpenCase = styled(motion.article)`
     line-height: 1.6;
   }
 
-  .page-flourish {
-    display: block;
-    width: 44px;
-    height: 2px;
-    background: var(--accent);
-    margin: 2px 0;
-  }
-
   .page-body {
     color: var(--text);
     max-width: 44ch;

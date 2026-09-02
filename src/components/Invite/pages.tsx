@@ -20,7 +20,6 @@ export function DatePage({ doc }: PageProps) {
   return (
     <>
       <h2 className="page-title">{formatLongDate(doc.date) || 'The date is coming'}</h2>
-      <span className="page-flourish" aria-hidden="true" />
       {time && <p className="page-caps">{time}</p>}
       {place && <p className="page-caps is-dim">{place}</p>}
       {doc.dateNote && <p className="page-note">{doc.dateNote}</p>}
@@ -73,7 +72,6 @@ export function PlayPage({ doc }: PageProps) {
   return (
     <>
       <h2 className="page-title">Press play</h2>
-      <span className="page-flourish" aria-hidden="true" />
       {doc.note && <p className="page-note">{doc.note}</p>}
       <a className="page-play" href={doc.playlist} target="_blank" rel="noreferrer">
         <Play aria-hidden="true" size={18} />
