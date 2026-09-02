@@ -75,7 +75,8 @@ link no longer fits in a QR code; the share panel says so instead of printing on
   lines (`dateNote`, `note`) print in italics; travel notes and questions set as
   credits with hairlines between entries.
 - The questions page prints a QR code of the couple's wedding website (`website`),
-  when one is provided. No website, no code. (The guest-link QR for printing lives in
+  when one is provided — and the whole card is a link to that website, for the guest
+  reading on the very phone that cannot scan itself. No website, no code. (The guest-link QR for printing lives in
   the builder's share panel, not the invite.)
 - **EXPERIMENT (2026-09-02, may be reverted):** sheets never scroll. When a page has
   more content than its sheet can show, the last lines fade out under a printed

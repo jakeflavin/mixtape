@@ -490,6 +490,16 @@ export const OpenCase = styled(motion.article)`
     border: 1px solid var(--line);
     border-radius: var(--radius);
     background: var(--surface-hi);
+    text-decoration: none;
+    transition: border-color 0.2s ease;
+  }
+
+  .page-qr:hover {
+    border-color: var(--accent);
+  }
+
+  .page-qr:hover .page-qr-caption {
+    color: var(--text);
   }
 
   .page-qr img {
@@ -501,10 +511,14 @@ export const OpenCase = styled(motion.article)`
     padding: 4px;
   }
 
-  .page-qr figcaption {
+  .page-qr-caption {
     color: var(--dim);
     font-size: var(--font-small);
     max-width: 18ch;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-color: color-mix(in srgb, var(--dim) 55%, transparent);
+    transition: color 0.2s ease;
   }
 
   .page-play {

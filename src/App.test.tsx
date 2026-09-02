@@ -102,6 +102,10 @@ describe('invite', () => {
     expect(
       await screen.findByRole('img', { name: /qr code opening https:\/\/juneandtheo\.example/i }),
     ).toBeInTheDocument()
+    // The whole card is a link to the website, not just a picture of one.
+    expect(
+      screen.getByRole('link', { name: /everything else is on our website/i }),
+    ).toHaveAttribute('href', 'https://juneandtheo.example')
   })
 
   it('prints no QR code when there is no website', async () => {

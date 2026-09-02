@@ -59,10 +59,10 @@ export function FaqPage({ doc }: PageProps) {
         ))}
       </ul>
       {doc.website && qr && (
-        <figure className="page-qr">
+        <a className="page-qr" href={doc.website} target="_blank" rel="noreferrer">
           <img src={qr} alt={`QR code opening ${doc.website}`} width="112" height="112" />
-          <figcaption>Everything else is on our website.</figcaption>
-        </figure>
+          <span className="page-qr-caption">Everything else is on our website.</span>
+        </a>
       )}
     </>
   )
