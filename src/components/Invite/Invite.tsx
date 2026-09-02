@@ -185,7 +185,7 @@ export function Invite({ doc }: InviteProps) {
             </div>
             <div className="panel tray" aria-hidden="true">
               <div className="tray-recess">
-                <Disc names={doc.names} album={doc.album} spinning={opened} />
+                <Disc names={doc.names} album={doc.album} spinning={opened} image={doc.discImage} />
               </div>
               <span className="tray-clip" />
             </div>

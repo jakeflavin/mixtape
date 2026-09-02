@@ -20,7 +20,10 @@ type CopyTarget = 'guest' | 'edit' | null
 export function SharePanel({ doc }: SharePanelProps) {
   const guest = useMemo(() => shareUrl(doc), [doc])
   const edit = useMemo(() => editUrl(doc), [doc])
-  const qr = useQr(guest)
+  // A QR code tops out around 3KB, and links carrying artwork are far past
+  // that — the hook is only fed a link a code can actually hold.
+  const fitsQr = guest.length <= 2500
+  const qr = useQr(fitsQr ? guest : '')
   const [copied, setCopied] = useState<CopyTarget>(null)
 
   useEffect(() => {
@@ -87,11 +90,17 @@ export function SharePanel({ doc }: SharePanelProps) {
         </p>
       </div>
       <div className="share-foot">
-        {qr && (
+        {fitsQr && qr && (
           <figure className="share-qr">
             <img src={qr} alt="QR code opening the guest link" width="120" height="120" />
             <figcaption>The same guest link, for anything printed.</figcaption>
           </figure>
+        )}
+        {!fitsQr && (
+          <p className="share-hint">
+            With your own photos aboard, the link is too long for a QR code. It still works
+            everywhere a link can be pasted.
+          </p>
         )}
         <a className="share-open" href={guest} target="_blank" rel="noreferrer">
           <ExternalLink size={16} aria-hidden="true" />

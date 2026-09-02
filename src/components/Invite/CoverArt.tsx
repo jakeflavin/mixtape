@@ -18,7 +18,16 @@ export function CoverArt({ doc }: CoverArtProps) {
   const both = a && b ? `${a} & ${b}` : a || b || 'Two people'
   const year = coverYear(doc.date)
   return (
-    <Face className="cover-face" $motif={themeById(doc.theme).motif}>
+    <Face
+      className={doc.coverImage ? 'cover-face has-photo' : 'cover-face'}
+      $motif={themeById(doc.theme).motif}
+    >
+      {doc.coverImage && (
+        <>
+          <img className="cover-photo" src={doc.coverImage} alt="" />
+          <span className="cover-scrim" aria-hidden="true" />
+        </>
+      )}
       <span className="cover-eyebrow">{doc.album || 'Save the date'}</span>
       <span className="cover-names">{both}</span>
       <span className="cover-foot">
@@ -117,5 +126,48 @@ const Face = styled.div<{ $motif: keyof typeof MOTIFS }>`
     letter-spacing: 0.18em;
     text-transform: uppercase;
     color: var(--cover-dim);
+  }
+
+  /* The couple's own cover photo, full bleed under the printed text. The
+   * scrim buys the type its contrast whatever the photo holds. */
+  .cover-photo {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .cover-scrim {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      180deg,
+      rgb(0 0 0 / 0.42) 0%,
+      rgb(0 0 0 / 0.06) 30%,
+      rgb(0 0 0 / 0.06) 55%,
+      rgb(0 0 0 / 0.5) 100%
+    );
+  }
+
+  &.has-photo {
+    /* Printed over a photo, the type goes white with a breath of shadow —
+     * the theme's cover ink can't know what it is sitting on. */
+    .cover-eyebrow,
+    .cover-foot {
+      color: rgb(255 255 255 / 0.82);
+    }
+
+    .cover-names {
+      color: #ffffff;
+      text-shadow: 0 1px 12px rgb(0 0 0 / 0.45);
+    }
+
+    .cover-eyebrow,
+    .cover-names,
+    .cover-foot {
+      position: relative;
+      z-index: 1;
+    }
   }
 `

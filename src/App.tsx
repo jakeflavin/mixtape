@@ -10,7 +10,7 @@ import { Invite } from '@/components/Invite'
  * what lets index.html paint the right ground before anything runs.
  */
 export function App() {
-  const [route] = useState(() => readRoute(window.location.search))
+  const [route] = useState(() => readRoute(window.location.search, window.location.hash))
 
   if (route.doc && !route.editing) return <Invite doc={route.doc} />
   return <Builder initial={route.doc} />

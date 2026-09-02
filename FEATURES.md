@@ -21,13 +21,26 @@ or truncated `m` falls back to the builder rather than a broken invite.
 
 `lib/types.ts` is the whole schema: names, date, time, venue, city, a line for the date
 page, travel notes, FAQs, playlist link, a note, a wedding website, an album title, a
-theme. `lib/codec.ts` compresses it (lz-string →
+theme, and the couple's own artwork for the cover and the disc. `lib/codec.ts` compresses it (lz-string →
 URL-safe blob) and treats everything read back as hostile — unknown fields dropped, sizes
 clamped, malformed list entries discarded, unknown themes mapped to the default. Every
 list entry carries an id so builder edits have stable keys.
 
 The theme id also rides separately as `t`, purely so `index.html` can resolve the ground
 without decompressing anything.
+
+**The document rides in the URL fragment** (`#t=…&m=…`), not the query string: fragments
+never reach a server, and a document carrying artwork is tens of kilobytes — far past the
+request-line limits that answer a long query with a 431. Links shared before the move
+(`?t=…&m=…`) still read.
+
+**Custom artwork** (`coverImage`, `discImage`): the couple can print their own photos
+over any theme — full bleed on the cover under a contrast scrim with the type gone
+white, and edge to edge on the disc with the hub punched out. The builder shrinks a
+picked photo on a canvas (JPEG, descending size/quality steps) until it fits the link;
+sanitize accepts only `data:image/` under 160KB or an `https://` URL, and drops
+anything else whole — a clamped image is a broken image. With artwork aboard the guest
+link no longer fits in a QR code; the share panel says so instead of printing one.
 
 ## The invite
 

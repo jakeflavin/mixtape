@@ -4,6 +4,7 @@ import { useDraft } from '@/hooks/useDraft'
 import { useGenreTheme } from '@/hooks/useGenreTheme'
 import { useSystemTheme } from '@/hooks/useSystemTheme'
 import { CoverArt } from '@/components/Invite/CoverArt'
+import { ArtworkPicker } from './ArtworkPicker'
 import { ItemsEditor } from './ItemsEditor'
 import { ThemePicker } from './ThemePicker'
 import { SharePanel } from './SharePanel'
@@ -216,6 +217,24 @@ export function Builder({ initial }: BuilderProps) {
           <Section>
             <h2>The look</h2>
             <ThemePicker value={doc.theme} onPick={(theme) => update({ theme })} />
+            <p className="section-hint">
+              Or print your own photos over the theme — on the album cover, on the disc, or both.
+              They travel inside the link, which gets long enough that it stops fitting in a QR
+              code.
+            </p>
+            <div className="artwork-row">
+              <ArtworkPicker
+                label="Album cover"
+                value={doc.coverImage}
+                onChange={(coverImage) => update({ coverImage })}
+              />
+              <ArtworkPicker
+                label="The disc"
+                value={doc.discImage}
+                round
+                onChange={(discImage) => update({ discImage })}
+              />
+            </div>
           </Section>
           <SharePanel doc={doc} />
         </Form>

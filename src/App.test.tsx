@@ -7,7 +7,7 @@ import { starterDoc } from '@/lib/starter'
 
 function visit(url: string) {
   const parsed = new URL(url)
-  window.history.replaceState(null, '', parsed.pathname + parsed.search)
+  window.history.replaceState(null, '', parsed.pathname + parsed.search + parsed.hash)
 }
 
 afterEach(() => {
@@ -158,7 +158,7 @@ describe('builder', () => {
     await user.clear(venue)
     await user.type(venue, 'Red Rocks')
     const link = screen.getByLabelText(/guest link/i) as HTMLInputElement
-    const blob = new URL(link.value).searchParams.get('m')
+    const blob = new URLSearchParams(new URL(link.value).hash.slice(1)).get('m')
     expect(blob).toBeTruthy()
   })
 })

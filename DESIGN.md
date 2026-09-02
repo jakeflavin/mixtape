@@ -34,6 +34,14 @@ Every colour a component uses is a token (`--bg`, `--text`, `--dim`, `--line`,
 QR modules and their white card (contrast for a camera, commented as such) and the theme
 picker swatches (each paints a palette that is by definition not the active one).
 
+## Custom artwork
+
+Any theme can carry the couple's own photos. On the cover the photo runs full bleed
+under a top-and-bottom scrim and the type goes white with a breath of shadow — the
+theme's cover ink cannot know what it is sitting on. On the disc the photo prints edge
+to edge and the hub hole punches through it. The theme still owns everything else:
+ground, paper, accents, type.
+
 ## Theme anatomy
 
 A theme is: a palette, a display face (`--font-display`, with tracking and case), and a

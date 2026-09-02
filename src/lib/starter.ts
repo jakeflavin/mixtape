@@ -43,5 +43,7 @@ export function starterDoc(): SaveTheDate {
     website: '',
     album: 'Save the date',
     theme: 'indie',
+    coverImage: '',
+    discImage: '',
   }
 }

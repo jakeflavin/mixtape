@@ -64,29 +64,59 @@ describe('sanitize', () => {
     const doc = sanitize({ venue: 'x'.repeat(9000) })
     expect(doc.venue.length).toBeLessThanOrEqual(200)
   })
+
+  it('keeps artwork that is a data url or https, drops everything else', () => {
+    const data = 'data:image/jpeg;base64,AAAA'
+    expect(sanitize({ coverImage: data }).coverImage).toBe(data)
+    expect(sanitize({ discImage: 'https://example.test/a.jpg' }).discImage).toBe(
+      'https://example.test/a.jpg',
+    )
+    expect(sanitize({ coverImage: 'javascript:alert(1)' }).coverImage).toBe('')
+    expect(sanitize({ coverImage: 'http://example.test/a.jpg' }).coverImage).toBe('')
+    expect(sanitize({ coverImage: 'blob:whatever' }).coverImage).toBe('')
+  })
+
+  it('drops artwork whole rather than clamping it broken', () => {
+    const huge = 'data:image/jpeg;base64,' + 'A'.repeat(200_000)
+    expect(sanitize({ coverImage: huge }).coverImage).toBe('')
+  })
+
+  it('round-trips artwork through the link', () => {
+    const doc = { ...starterDoc(), discImage: 'data:image/jpeg;base64,QUJD' }
+    expect(decode(encode(doc))?.discImage).toBe('data:image/jpeg;base64,QUJD')
+  })
 })
 
 describe('urls', () => {
-  it('builds a share url carrying theme and blob', () => {
+  it('carries the document in the fragment, so it never reaches a server', () => {
     const doc = { ...starterDoc(), theme: 'jazz' as const }
     const url = new URL(shareUrl(doc, 'https://example.test'))
-    expect(url.searchParams.get('t')).toBe('jazz')
-    expect(decode(url.searchParams.get('m') ?? '')).toEqual(doc)
+    expect(url.search).toBe('')
+    const fragment = new URLSearchParams(url.hash.slice(1))
+    expect(fragment.get('t')).toBe('jazz')
+    expect(decode(fragment.get('m') ?? '')).toEqual(doc)
   })
 
   it('edit url reopens the same document in the builder', () => {
     const doc = starterDoc()
     const url = new URL(editUrl(doc, 'https://example.test'))
-    const route = readRoute(url.search)
+    const route = readRoute(url.search, url.hash)
     expect(route.editing).toBe(true)
     expect(route.doc).toEqual(doc)
   })
 
+  it('still reads documents from the query string of older links', () => {
+    const doc = starterDoc()
+    const route = readRoute(`?t=${doc.theme}&m=${encode(doc)}`)
+    expect(route.doc).toEqual(doc)
+    expect(route.editing).toBe(false)
+  })
+
   it('readRoute treats a corrupt blob as no document', () => {
-    expect(readRoute('?m=garbage')).toEqual({ doc: null, editing: false })
+    expect(readRoute('', '#m=garbage')).toEqual({ doc: null, editing: false })
   })
 
   it('readRoute with no params is the builder', () => {
-    expect(readRoute('')).toEqual({ doc: null, editing: false })
+    expect(readRoute('', '')).toEqual({ doc: null, editing: false })
   })
 })

@@ -50,4 +50,11 @@ export interface SaveTheDate {
   /** The album title printed on the cover. */
   album: string
   theme: ThemeId
+  /**
+   * The couple's own artwork, replacing the theme's cover art and disc print.
+   * Data URLs (shrunk client-side) so they travel inside the link, or https
+   * URLs for artwork hosted elsewhere. Empty means the theme draws it.
+   */
+  coverImage: string
+  discImage: string
 }

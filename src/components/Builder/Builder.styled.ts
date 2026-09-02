@@ -83,6 +83,13 @@ export const Section = styled.section`
     margin-top: -6px;
   }
 
+  /* The look's own-artwork slots sit side by side. */
+  .artwork-row {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
   .section-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;

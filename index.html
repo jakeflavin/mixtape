@@ -61,10 +61,14 @@
           punk: ['#f4f2ef', '#151312', 'light'],
           disco: ['#170f22', '#f6effc', 'dark'],
         }
-        var params = new URLSearchParams(location.search)
-        var ground = grounds[params.get('t')]
+        var query = new URLSearchParams(location.search)
+        var fragment = new URLSearchParams(location.hash.slice(1))
+        var theme = fragment.get('t') || query.get('t')
+        var blob = fragment.get('m') || query.get('m')
+        var editing = (fragment.get('edit') || query.get('edit')) === '1'
+        var ground = grounds[theme]
         var root = document.documentElement
-        if (ground && params.get('m') && params.get('edit') !== '1') {
+        if (ground && blob && !editing) {
           root.style.setProperty('--bg', ground[0])
           root.style.setProperty('--text', ground[1])
           root.style.colorScheme = ground[2]

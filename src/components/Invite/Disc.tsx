@@ -5,6 +5,8 @@ export interface DiscProps {
   album: string
   /** A disc in the tray sits still until the case has opened. */
   spinning: boolean
+  /** The couple's own disc print. Set, it replaces the label and its text. */
+  image?: string
 }
 
 /*
@@ -12,16 +14,20 @@ export interface DiscProps {
  * gradient at low alpha over the label gradient — enough sheen to read as a
  * disc without turning into a beach ball.
  */
-export function Disc({ names, album, spinning }: DiscProps) {
+export function Disc({ names, album, spinning, image }: DiscProps) {
   const [a, b] = names
   const both = a && b ? `${a} & ${b}` : a || b || 'Side A'
   return (
     <Box className="disc-box" aria-hidden="true">
       <Shell className="disc" $spinning={spinning}>
-        <span className="disc-label">
-          <span className="disc-names">{both}</span>
-          <span className="disc-album">{album || 'Save the date'}</span>
-        </span>
+        {image ? (
+          <img className="disc-print" src={image} alt="" />
+        ) : (
+          <span className="disc-label">
+            <span className="disc-names">{both}</span>
+            <span className="disc-album">{album || 'Save the date'}</span>
+          </span>
+        )}
       </Shell>
     </Box>
   )
@@ -75,6 +81,16 @@ const Shell = styled.span<{ $spinning: boolean }>`
     box-shadow:
       inset 0 0 0 1px color-mix(in srgb, var(--cover-text) 25%, transparent),
       0 0 0 6px color-mix(in srgb, var(--bg) 45%, transparent);
+  }
+
+  /* A photo printed edge to edge, the hub punched out of it by ::after. */
+  .disc-print {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
   }
 
   .disc-label {

@@ -19,6 +19,20 @@ function cleanString(value: unknown, max = MAX_TEXT): string {
   return typeof value === 'string' ? value.slice(0, max) : ''
 }
 
+/*
+ * Artwork is either a data URL the builder shrank, or an https URL. Anything
+ * else — javascript:, blob:, http:, or an image too big to be a sane link —
+ * is dropped whole: clamping mid-base64 would keep a broken image.
+ */
+const MAX_DATA_IMAGE = 160_000
+
+function cleanImage(value: unknown): string {
+  if (typeof value !== 'string') return ''
+  if (value.startsWith('data:image/')) return value.length <= MAX_DATA_IMAGE ? value : ''
+  if (value.startsWith('https://')) return value.length <= 2000 ? value : ''
+  return ''
+}
+
 function cleanTheme(value: unknown): ThemeId {
   return THEMES.some((t) => t.id === value) ? (value as ThemeId) : DEFAULT_THEME
 }
@@ -77,6 +91,8 @@ export function sanitize(value: unknown): SaveTheDate {
     website: cleanString(record.website, 500),
     album: cleanString(record.album, 120),
     theme: cleanTheme(record.theme),
+    coverImage: cleanImage(record.coverImage),
+    discImage: cleanImage(record.discImage),
   }
 }
 
@@ -100,10 +116,16 @@ export function decode(blob: string): SaveTheDate | null {
   }
 }
 
-/** The invite link for a document, absolute so it can be copied or QR'd. */
+/**
+ * The invite link for a document, absolute so it can be copied or QR'd.
+ *
+ * The document rides in the URL fragment, not the query string: fragments
+ * never reach a server, and a document carrying artwork is tens of kilobytes
+ * — far past the request-line limits that answer a long query with a 431.
+ */
 export function shareUrl(doc: SaveTheDate, origin = window.location.origin): string {
   const base = import.meta.env.BASE_URL
-  return `${origin}${base}?t=${doc.theme}&m=${encode(doc)}`
+  return `${origin}${base}#t=${doc.theme}&m=${encode(doc)}`
 }
 
 /** The same document reopened in the builder. */
@@ -116,11 +138,13 @@ export interface RouteState {
   editing: boolean
 }
 
-export function readRoute(search: string): RouteState {
-  const params = new URLSearchParams(search)
-  const blob = params.get('m')
+/** Fragment first; the query string still reads for links shared before the move. */
+export function readRoute(search: string, hash = ''): RouteState {
+  const query = new URLSearchParams(search)
+  const fragment = new URLSearchParams(hash.startsWith('#') ? hash.slice(1) : hash)
+  const blob = fragment.get('m') ?? query.get('m')
   return {
     doc: blob ? decode(blob) : null,
-    editing: params.get('edit') === '1',
+    editing: (fragment.get('edit') ?? query.get('edit')) === '1',
   }
 }
