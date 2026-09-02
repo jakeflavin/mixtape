@@ -519,6 +519,36 @@ export const OpenCase = styled(motion.article)`
     transform: translateY(-1px);
   }
 
+  /* Part of the sheet-modal experiment (see SheetModal.tsx): a paper chip on
+   * the booklet's corner, shown only when the open sheet has more to say than
+   * its window can show. */
+  .booklet-more {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    z-index: 70;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--line);
+    background: color-mix(in srgb, var(--surface) 92%, transparent);
+    color: var(--dim);
+    font-size: var(--font-tiny);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    box-shadow: var(--shadow);
+    transition:
+      color 0.2s ease,
+      background 0.2s ease;
+  }
+
+  .booklet-more:hover {
+    color: var(--text);
+    background: var(--surface);
+  }
+
   /* The page turns: a folio between two chevrons, set on the ground under
    * the album case so they never cover what the booklet says. They arrive
    * with the booklet. */

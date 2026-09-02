@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useReducedMotion } from 'motion/react'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Maximize2 } from 'lucide-react'
 import { useGenreTheme } from '@/hooks/useGenreTheme'
 import { CoverArt } from './CoverArt'
 import { Disc } from './Disc'
 import { DatePage, FaqPage, PlayPage, TravelPage } from './pages'
+import { SheetModal } from './SheetModal'
 import { Scene, OpenCase, Footer } from './Invite.styled'
 import type { PointerEvent as ReactPointerEvent, MouseEvent as ReactMouseEvent } from 'react'
 import type { SaveTheDate } from '@/lib/types'
@@ -63,17 +64,46 @@ export function Invite({ doc }: InviteProps) {
   }, [doc])
 
   const lastIndex = pages.length - 1
-  const turnTo = (index: number) => setPageIndex(Math.max(0, Math.min(index, lastIndex)))
+  const current = pages[Math.min(pageIndex, lastIndex)] ?? pages[0]
+
+  /*
+   * EXPERIMENT (2026-09-02): a small window can cut a sheet off with only a
+   * scrollbar to say so. When the open sheet overflows, a More chip appears
+   * and opens the page full-height in SheetModal. Ships as one commit; revert
+   * that commit to take the whole idea back out.
+   */
+  const [overflowing, setOverflowing] = useState(false)
+  const [expanded, setExpanded] = useState(false)
+
+  const turnTo = (index: number) => {
+    setExpanded(false)
+    setPageIndex(Math.max(0, Math.min(index, lastIndex)))
+  }
 
   useEffect(() => {
-    if (!opened) return
+    // Deferred a frame so the measurement reads settled layout.
+    const measure = () => {
+      const sheet = document.querySelector<HTMLElement>('.sheet[aria-hidden="false"]')
+      setOverflowing(sheet !== null && sheet.scrollHeight > sheet.clientHeight + 4)
+    }
+    const frame = requestAnimationFrame(measure)
+    window.addEventListener('resize', measure)
+    return () => {
+      cancelAnimationFrame(frame)
+      window.removeEventListener('resize', measure)
+    }
+  }, [opened, current])
+
+  useEffect(() => {
+    // Arrow keys page the booklet, but not underneath the expanded sheet.
+    if (!opened || expanded) return
     const handleArrows = (event: KeyboardEvent) => {
       if (event.key === 'ArrowRight') setPageIndex((i) => Math.min(i + 1, lastIndex))
       if (event.key === 'ArrowLeft') setPageIndex((i) => Math.max(i - 1, 0))
     }
     window.addEventListener('keydown', handleArrows)
     return () => window.removeEventListener('keydown', handleArrows)
-  }, [opened, lastIndex])
+  }, [opened, expanded, lastIndex])
 
   /*
    * The page turn is handled by hand with pointer events rather than motion's
@@ -226,7 +256,18 @@ export function Invite({ doc }: InviteProps) {
               })}
             </div>
           </div>
+          {opened && overflowing && current.id !== 'cover' && (
+            <button type="button" className="booklet-more" onClick={() => setExpanded(true)}>
+              <Maximize2 size={13} aria-hidden="true" />
+              <span>More</span>
+            </button>
+          )}
         </div>
+        {expanded && (
+          <SheetModal label={current.label} onClose={() => setExpanded(false)}>
+            {current.content}
+          </SheetModal>
+        )}
         <nav className="booklet-nav" aria-label="Booklet pages" aria-hidden={!opened}>
           <button
             type="button"

@@ -64,6 +64,11 @@ without decompressing anything.
 - The questions page prints a QR code of the couple's wedding website (`website`),
   when one is provided. No website, no code. (The guest-link QR for printing lives in
   the builder's share panel, not the invite.)
+- **EXPERIMENT (2026-09-02, may be reverted):** when the open sheet has more content
+  than its window shows, a "More" chip appears on the booklet's corner and opens the
+  page full-height in a native dialog (SheetModal). Overflow is measured on the live
+  sheet, so the chip only exists when scrolling would. The whole feature is one commit;
+  revert that commit to remove it.
 - The footer links back to the builder ("Make one for your own wedding").
 - Reduced motion collapses every entrance to a plain appearance and parks the disc.
 
