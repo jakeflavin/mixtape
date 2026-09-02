@@ -81,15 +81,17 @@ export function Invite({ doc }: InviteProps) {
   }
 
   useEffect(() => {
-    // Deferred a frame so the measurement reads settled layout.
+    // Deferred so the measurement reads settled layout. A timer rather than
+    // requestAnimationFrame: embedded webviews starve rAF, and a starved
+    // frame here means the chip never appears at all.
     const measure = () => {
       const sheet = document.querySelector<HTMLElement>('.sheet[aria-hidden="false"]')
       setOverflowing(sheet !== null && sheet.scrollHeight > sheet.clientHeight + 4)
     }
-    const frame = requestAnimationFrame(measure)
+    const timer = window.setTimeout(measure, 60)
     window.addEventListener('resize', measure)
     return () => {
-      cancelAnimationFrame(frame)
+      window.clearTimeout(timer)
       window.removeEventListener('resize', measure)
     }
   }, [opened, current])
