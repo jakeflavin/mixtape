@@ -46,7 +46,7 @@ export function TravelPage({ doc }: PageProps) {
 export function FaqPage({ doc }: PageProps) {
   // With no website there is nothing to encode; the hook returns null and the
   // block below never prints.
-  const qr = useQr(doc.website)
+  const { src: qr } = useQr(doc.website)
   return (
     <>
       <h2 className="page-title">Good questions</h2>

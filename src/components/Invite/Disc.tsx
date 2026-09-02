@@ -107,6 +107,9 @@ const Shell = styled.span<{ $spinning: boolean }>`
     border-radius: 50%;
   }
 
+  /* A printed label has one line for each thing and no more: long names wrap
+   * into the album title otherwise, and the two print through each other. A
+   * real CD label drops what will not fit. */
   .disc-names {
     font-family: var(--font-display);
     letter-spacing: var(--display-tracking);
@@ -114,7 +117,9 @@ const Shell = styled.span<{ $spinning: boolean }>`
     font-weight: 700;
     font-size: clamp(11px, 5.5cqw, 22px);
     max-width: 80%;
-    overflow-wrap: anywhere;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .disc-album {
@@ -122,5 +127,9 @@ const Shell = styled.span<{ $spinning: boolean }>`
     letter-spacing: 0.22em;
     text-transform: uppercase;
     opacity: 0.75;
+    max-width: 78%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 `

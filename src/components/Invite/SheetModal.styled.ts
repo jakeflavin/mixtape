@@ -31,14 +31,16 @@ export const Dialog = styled.dialog`
 
   .modal-close {
     position: absolute;
-    top: 12px;
-    right: 12px;
-    z-index: 1;
+    top: 8px;
+    right: 8px;
+    z-index: 2;
     background: color-mix(in srgb, var(--surface) 85%, transparent);
+    background-clip: content-box;
     display: grid;
     place-items: center;
-    width: 34px;
-    height: 34px;
+    width: 44px;
+    height: 44px;
+    padding: 5px;
     border-radius: 50%;
     color: var(--dim);
     transition:
@@ -49,6 +51,22 @@ export const Dialog = styled.dialog`
   .modal-close:hover {
     color: var(--text);
     background: var(--surface-hi);
+    background-clip: content-box;
+  }
+
+  /* The same printed fade the sheet uses, so a page that goes on saying so
+   * looks the same in here as it did out there. Set by the component, which
+   * knows whether there is anything below the fold. */
+  &.has-more::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 54px;
+    z-index: 1;
+    pointer-events: none;
+    background: linear-gradient(180deg, transparent, var(--surface) 82%);
   }
 
   /* On a phone the sheet takes the whole screen. */

@@ -24,6 +24,16 @@ export const Scene = styled.main`
   .case-hint.is-open {
     opacity: 0;
   }
+
+  @media print {
+    display: block;
+    min-height: 0;
+    padding: 0;
+
+    .case-hint {
+      display: none;
+    }
+  }
 `
 
 /*
@@ -544,15 +554,19 @@ export const OpenCase = styled(motion.article)`
   /* Part of the sheet-modal experiment (see SheetModal.tsx): a paper chip on
    * the booklet's corner, shown only when the open sheet has more to say than
    * its window can show. */
+  /* Below the paper's edge, on the plastic — never printed over the words it
+   * exists to rescue. Same rule the folio and chevrons follow. */
   .booklet-more {
     position: absolute;
-    right: 10px;
-    bottom: 10px;
+    right: 4px;
+    top: 100%;
+    margin-top: 10px;
     z-index: 70;
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 6px 12px;
+    min-height: 44px;
+    padding: 6px 14px;
     border-radius: var(--radius-pill);
     border: 1px solid var(--line);
     background: color-mix(in srgb, var(--surface) 92%, transparent);
@@ -602,12 +616,16 @@ export const OpenCase = styled(motion.article)`
     white-space: nowrap;
   }
 
+  /* The visible chevron stays a 28px disc; the box around it is 44px, which
+   * is what a finger needs. Padding does the growing, so nothing moves. */
   .booklet-turn {
     display: grid;
     place-items: center;
-    width: 28px;
-    height: 28px;
+    width: 44px;
+    height: 44px;
+    padding: 8px;
     border-radius: 50%;
+    background-clip: content-box;
     color: var(--dim);
     transition:
       color 0.2s ease,
@@ -617,6 +635,7 @@ export const OpenCase = styled(motion.article)`
   .booklet-turn:hover:not(:disabled) {
     color: var(--text);
     background: var(--surface-hi);
+    background-clip: content-box;
   }
 
   .booklet-turn:disabled {
@@ -649,10 +668,12 @@ export const OpenCase = styled(motion.article)`
    * out past the left edge and is simply cut off. The booklet stays square,
    * the shape of the thing that actually comes out of a jewel case. */
   @media (max-width: 899px) {
-    width: calc(172vw + 34px);
+    /* Two panel-widths plus the hinge, capped so a tablet gets a jewel case
+     * rather than a billboard. */
+    width: min(calc(172vw + 34px), 1140px);
 
     .case-shell {
-      grid-template-columns: 86vw 14px 86vw;
+      grid-template-columns: min(86vw, 560px) 14px min(86vw, 560px);
       padding: 10px;
     }
 
@@ -684,8 +705,11 @@ export const OpenCase = styled(motion.article)`
       left: calc(50% + 7px);
     }
 
+    /* The record sits low in the tray here, so its lower arc stays out from
+     * under the booklet that lies across the top of the case. */
     .tray {
       padding: 8%;
+      align-items: end;
     }
 
     .tray-recess {
@@ -697,12 +721,13 @@ export const OpenCase = styled(motion.article)`
     }
 
     .booklet {
-      /* Square, riding a little high on the case so the disc's lower arc
-       * stays in view beneath it. */
-      top: -3%;
+      /* Square, riding high enough on the case that a real arc of the record
+       * shows beneath it — not a sliver. Measured, not guessed: under 900px
+       * the booklet used to cover the disc outright. */
+      top: -7%;
       bottom: auto;
       left: 50%;
-      width: 78vw;
+      width: min(76vw, 430px);
       aspect-ratio: 1 / 1.04;
       transform: translateX(-50%) rotate(-1deg) translateY(-18px) scale(1.05);
     }
@@ -710,19 +735,234 @@ export const OpenCase = styled(motion.article)`
     &.is-open .booklet {
       transform: translateX(-50%) rotate(-2.4deg);
     }
+
+    /* A phone's sheet is small, so the page has to be set tighter to hold a
+     * normal invite without being cut off. The scale is the same one, wound
+     * down a notch; nothing is centred and nothing moves. */
+    .sheet {
+      gap: 9px;
+      padding: 16px;
+      padding-left: 24px;
+    }
+
+    .page-eyebrow {
+      padding-bottom: 7px;
+    }
+
+    .page-list {
+      gap: 10px;
+    }
+
+    .page-list li + li {
+      padding-top: 10px;
+    }
+
+    .page-body {
+      font-size: var(--font-small);
+      line-height: 1.45;
+    }
+
+    .page-qr img {
+      width: 72px;
+      height: 72px;
+    }
+  }
+
+  /* The floor. A 320px screen gives the sheet so little room that the booklet
+   * takes a larger share of the case and the page is set smaller again — the
+   * alternative is a normal invite arriving cut in half. */
+  @media (max-width: 380px) {
+    .booklet {
+      top: -12%;
+      width: 84vw;
+    }
+
+    .sheet {
+      gap: 7px;
+      padding: 13px;
+      padding-left: 20px;
+    }
+
+    .page-title {
+      font-size: 20px;
+    }
+
+    .page-body,
+    .page-caps,
+    .page-item-title {
+      font-size: var(--font-tiny);
+      line-height: 1.4;
+    }
+  }
+  /*
+   * On paper, the case is not the point — the words are. A save-the-date is
+   * the most printable thing there is, so printing lays the booklet out as
+   * what it always was: a stack of pages, in order, in ink. The plastic, the
+   * chevrons and the album art all belong to the screen.
+   */
+  @media print {
+    width: 100%;
+    max-width: 100%;
+
+    /* Print flips these properties, and a transition would carry the old
+     * value onto the page — a booklet caught mid-rotation. */
+    *,
+    *::before,
+    *::after {
+      transition: none !important;
+      animation: none !important;
+    }
+
+    .case-clip,
+    .booklet-nav,
+    .booklet-more,
+    .case-gloss {
+      display: none !important;
+    }
+
+    .booklet {
+      position: static;
+      width: 100%;
+      max-width: 100%;
+      top: auto;
+      left: auto;
+      aspect-ratio: auto;
+      visibility: visible;
+      opacity: 1;
+      transform: none !important;
+      filter: none;
+    }
+
+    .booklet-window {
+      height: auto;
+      cursor: auto;
+    }
+
+    .booklet-window::before,
+    .booklet-window.is-truncated::after {
+      display: none;
+    }
+
+    .booklet-sheets {
+      position: static;
+      height: auto;
+      perspective: none;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    .sheet {
+      position: static;
+      inset: auto;
+      padding: 0;
+      overflow: visible;
+      background: none;
+      box-shadow: none;
+      border-radius: 0;
+      opacity: 1 !important;
+      transform: none !important;
+      break-inside: avoid;
+    }
+
+    /* Staples and the gutter are the object, not the page. */
+    .sheet::before,
+    .sheet::after {
+      display: none;
+    }
+
+    /* The cover prints as a title page: its type, none of its artwork. */
+    .sheet.is-cover .cover-photo,
+    .sheet.is-cover .cover-scrim {
+      display: none;
+    }
+
+    /* The cover's face is absolutely placed over the sleeve on screen. On
+     * paper it is just the title block at the top of the first page. */
+    .sheet.is-cover .cover-face {
+      position: static;
+      display: block;
+      background: none;
+      background-image: none;
+      aspect-ratio: auto;
+      padding: 0 0 6px;
+    }
+
+    .sheet.is-cover .cover-names {
+      display: block;
+      font-size: 34px;
+      line-height: 1.1;
+      margin: 2px 0 4px;
+    }
+
+    .sheet.is-cover .cover-eyebrow {
+      display: block;
+      font-size: 11px;
+    }
+
+    .sheet.is-cover .cover-foot {
+      font-size: 11px;
+    }
+
+    .page-eyebrow,
+    .page-body,
+    .page-note,
+    .page-caps.is-dim,
+    .page-list .page-body,
+    .page-qr-caption,
+    .cover-eyebrow,
+    .cover-names,
+    .cover-foot {
+      color: #000;
+    }
+
+    .page-eyebrow::after {
+      background: #000;
+    }
+
+    /* A button is nothing on paper; the address is everything. */
+    .page-play {
+      background: none;
+      color: #000;
+      padding: 0;
+      font-weight: 600;
+    }
+
+    .page-play::after {
+      content: ' — ' attr(href);
+      font-weight: 400;
+      word-break: break-all;
+    }
+
+    .page-qr {
+      border-color: #000;
+      background: none;
+    }
   }
 `
 
 export const Footer = styled.footer`
   font-size: var(--font-small);
   color: var(--dim);
+  /* The negative margin keeps the sentence's own height while the link inside
+   * it is tall enough to press. */
+  margin: -14px 0;
+  padding: 14px 0;
 
   a {
+    display: inline-block;
+    padding: 14px 2px;
+    margin: -14px 0;
     color: inherit;
     text-underline-offset: 3px;
   }
 
   a:hover {
     color: var(--text);
+  }
+
+  /* A credit with a link in it is furniture on paper. */
+  @media print {
+    display: none;
   }
 `

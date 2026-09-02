@@ -44,6 +44,11 @@ export function Invite({ doc }: InviteProps) {
   const [opened, setOpened] = useState(false)
   const [pageIndex, setPageIndex] = useState(0)
   const reduced = useReducedMotion() ?? false
+  // The cover is a button that disables itself the moment it is pressed, so
+  // whoever pressed it with a keyboard is standing on nothing. Focus moves to
+  // the booklet's own controls instead.
+  const navRef = useRef<HTMLElement>(null)
+  const moreRef = useRef<HTMLButtonElement>(null)
 
   useGenreTheme(doc.theme, document.documentElement)
 
@@ -74,11 +79,36 @@ export function Invite({ doc }: InviteProps) {
    */
   const [overflowing, setOverflowing] = useState(false)
   const [expanded, setExpanded] = useState(false)
+  // Closing the dialog unmounts it, and the browser drops focus on the body.
+  // Put it back where it was pressed, once the dialog has actually gone — but
+  // never on the first render, where nothing was ever opened.
+  const wasExpanded = useRef(false)
+  useEffect(() => {
+    if (expanded) {
+      wasExpanded.current = true
+      return
+    }
+    if (!wasExpanded.current) return
+    wasExpanded.current = false
+    moreRef.current?.focus({ preventScroll: true })
+  }, [expanded])
   const truncated = opened && overflowing && current.id !== 'cover'
 
   const turnTo = (index: number) => {
     setExpanded(false)
     setPageIndex(Math.max(0, Math.min(index, lastIndex)))
+  }
+
+  const open = () => {
+    setOpened(true)
+    // After the booklet has arrived, not before: focusing a hidden element
+    // scrolls nothing and tells a screen reader nothing.
+    window.setTimeout(
+      () => {
+        navRef.current?.querySelector<HTMLButtonElement>('.booklet-turn.is-next')?.focus()
+      },
+      reduced ? 0 : 780,
+    )
   }
 
   useEffect(() => {
@@ -197,7 +227,7 @@ export function Invite({ doc }: InviteProps) {
               aria-label="Open the case"
               disabled={opened}
               tabIndex={opened ? -1 : 0}
-              onClick={() => setOpened(true)}
+              onClick={open}
             >
               <span className="cover-front">
                 <CoverArt doc={doc} />
@@ -207,7 +237,12 @@ export function Invite({ doc }: InviteProps) {
             </button>
           </div>
         </div>
-        <div className="booklet" aria-roledescription="carousel" aria-hidden={!opened}>
+        <div
+          className="booklet"
+          aria-roledescription="carousel"
+          aria-hidden={!opened}
+          inert={!opened}
+        >
           <div
             className={truncated ? 'booklet-window is-truncated' : 'booklet-window'}
             onPointerDown={handlePointerDown}
@@ -239,6 +274,10 @@ export function Invite({ doc }: InviteProps) {
                       .join(' ')}
                     aria-label={page.label}
                     aria-hidden={index !== pageIndex}
+                    /* A sheet nobody is reading keeps its links tabbable
+                     * otherwise: the first Tab after opening landed on the
+                     * playlist link of a page four turns away. */
+                    inert={index !== pageIndex}
                     style={{
                       zIndex: pages.length - index,
                       transform:
@@ -260,7 +299,12 @@ export function Invite({ doc }: InviteProps) {
             </div>
           </div>
           {truncated && (
-            <button type="button" className="booklet-more" onClick={() => setExpanded(true)}>
+            <button
+              type="button"
+              className="booklet-more"
+              ref={moreRef}
+              onClick={() => setExpanded(true)}
+            >
               <Maximize2 size={13} aria-hidden="true" />
               <span>More</span>
             </button>
@@ -271,7 +315,13 @@ export function Invite({ doc }: InviteProps) {
             {current.content}
           </SheetModal>
         )}
-        <nav className="booklet-nav" aria-label="Booklet pages" aria-hidden={!opened}>
+        <nav
+          className="booklet-nav"
+          aria-label="Booklet pages"
+          aria-hidden={!opened}
+          inert={!opened}
+          ref={navRef}
+        >
           <button
             type="button"
             className="booklet-turn is-prev"
